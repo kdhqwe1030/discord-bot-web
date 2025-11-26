@@ -36,6 +36,7 @@ const SignIn = ({ changeMode }: { changeMode: () => void }) => {
     }
 
     console.log("로그인 성공", data);
+    window.location.href = "/";
   };
   return (
     <div className="p-8 w-100">
