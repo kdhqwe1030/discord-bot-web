@@ -16,7 +16,7 @@ export async function POST(req: Request) {
     password,
     options: {
       data: { username },
-      emailRedirectTo: "http://localhost:3000/",
+      emailRedirectTo: process.env.NEXT_PUBLIC_URL,
     },
   });
 
