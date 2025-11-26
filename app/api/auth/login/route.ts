@@ -1,4 +1,3 @@
-// app/api/auth/login/route.ts
 import { createClient } from "@/lib/supabase/supabaseServer";
 import { NextResponse } from "next/server";
 
@@ -23,7 +22,9 @@ export async function POST(req: Request) {
   }
 
   return NextResponse.json({
-    message: "Login successful",
-    user: data.user,
+    data: {
+      message: "로그인 성공",
+      user: data.user,
+    },
   });
 }

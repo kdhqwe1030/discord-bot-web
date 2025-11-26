@@ -1,4 +1,3 @@
-// app/api/auth/register/route.ts
 import { createClient } from "@/lib/supabase/supabaseServer";
 import { NextResponse } from "next/server";
 
@@ -22,12 +21,14 @@ export async function POST(req: Request) {
   });
 
   if (error) {
-    console.error("❌ Supabase signup error:", error);
+    console.error("❌ 회원가입 오류 발생", error);
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
 
   return NextResponse.json({
-    message: "✅ User registered successfully",
-    user: data.user,
+    data: {
+      message: "회원가입 성공",
+      user: data.user,
+    },
   });
 }
