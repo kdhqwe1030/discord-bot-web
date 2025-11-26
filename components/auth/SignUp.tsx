@@ -1,5 +1,6 @@
 import { ChangeEvent, useState } from "react";
 import { IoArrowBackOutline } from "react-icons/io5";
+import { authAPI } from "@/lib/api/auth";
 
 const SignUp = ({ changeMode }: { changeMode: () => void }) => {
   // 유효성 검사 상태
@@ -46,11 +47,22 @@ const SignUp = ({ changeMode }: { changeMode: () => void }) => {
     const isAllValid = Object.values(newValidations).every((value) => value);
 
     if (isAllValid) {
-      try {
-        console.log("회원가입 성공");
-      } catch (error) {
-        console.log("회원가입 실패");
+      const { data, error } = await authAPI.register({
+        email: joinForm.email,
+        password: joinForm.password,
+        username: joinForm.name,
+      });
+
+      if (error) {
+        console.error("회원가입 실패", error);
+        alert(error);
+        setIsLoading(false);
+        return;
       }
+
+      console.log("회원가입 성공", data);
+      alert("회원가입이 완료되었습니다! 로그인해주세요.");
+      changeMode(); // 로그인 페이지로 이동
     }
 
     setIsLoading(false);

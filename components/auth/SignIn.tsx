@@ -1,6 +1,7 @@
 "use client";
 import { ChangeEvent, useState } from "react";
 import { FaDiscord } from "react-icons/fa";
+import { authAPI } from "@/lib/api/auth";
 const SignIn = ({ changeMode }: { changeMode: () => void }) => {
   const handleDiscordLogin = () => {
     window.location.href = "/api/auth/discord/link";
@@ -25,13 +26,16 @@ const SignIn = ({ changeMode }: { changeMode: () => void }) => {
     e.preventDefault();
     setIsLoading(true);
 
-    try {
-      console.log("로그인 성공", loginForm);
-    } catch (error) {
+    const { data, error } = await authAPI.login(loginForm);
+
+    if (error) {
       console.error("로그인 실패", error);
-    } finally {
+      alert(error);
       setIsLoading(false);
+      return;
     }
+
+    console.log("로그인 성공", data);
   };
   return (
     <div className="p-8 w-100">
