@@ -63,7 +63,7 @@ export const authAPI = {
   },
 
   // 로그아웃
-  logout: async (): Promise<ApiResponse<any>> => {
+  logout: async (): Promise<ApiResponse<AuthRes>> => {
     try {
       const response = await apiClient.post("/api/auth/logout");
       const result = await response.json();
