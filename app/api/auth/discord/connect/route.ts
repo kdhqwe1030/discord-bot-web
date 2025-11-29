@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 export async function GET() {
   const clientId = process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID!;
   const redirectUri = encodeURIComponent(
-    process.env.NEXT_PUBLIC_DISCORD_REDIRECT_URI!
+    process.env.NEXT_PUBLIC_URL! + "/api/auth/discord/connect/callback"
   );
 
   const scope = "identify email guilds"; // scope — identify, email, guilds

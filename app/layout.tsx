@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
+import Providers from "./providers";
 import "./globals.css";
+
+export const metadata: Metadata = {
+  title: "Discord Web",
+};
 
 export default function RootLayout({
   children,
@@ -7,7 +13,9 @@ export default function RootLayout({
 }>) {
   return (
     <html>
-      <body>{children}</body>
+      <body>
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }

@@ -4,7 +4,7 @@ import { FaDiscord } from "react-icons/fa";
 import { authAPI } from "@/lib/api/auth";
 const SignIn = ({ changeMode }: { changeMode: () => void }) => {
   const handleDiscordLogin = () => {
-    window.location.href = "/api/auth/discord/link";
+    window.location.href = "/api/auth/discord/login";
   };
   const [loginForm, setLoginForm] = useState({
     email: "",
