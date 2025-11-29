@@ -20,7 +20,8 @@ export async function GET(req: Request) {
       client_secret: process.env.DISCORD_CLIENT_SECRET!,
       grant_type: "authorization_code",
       code,
-      redirect_uri: process.env.NEXT_PUBLIC_DISCORD_REDIRECT_URI!,
+      redirect_uri:
+        process.env.NEXT_PUBLIC_URL! + "/api/auth/discord/connect/callback"!,
     }),
   });
 
