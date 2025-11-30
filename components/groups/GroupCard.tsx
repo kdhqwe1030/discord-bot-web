@@ -1,6 +1,7 @@
 "use client";
 
 import UserProfile from "@/components/users/UserProfile";
+import { useRouter } from "next/navigation";
 import { FaDiscord } from "react-icons/fa";
 
 interface GroupMember {
@@ -20,14 +21,19 @@ interface GroupCardProps {
 }
 
 const GroupCard = ({
+  id,
   name,
   linkedGuildId,
   memberCount,
   userRole,
   members,
 }: GroupCardProps) => {
+  const router = useRouter();
   return (
-    <div className="w-full bg-sub2 rounded-2xl p-6 shadow-lg shadow-black/40 text-white h-64 hover:border-discord border-2 border-transparent transition-all cursor-pointer">
+    <div
+      className="w-full bg-sub2 rounded-2xl p-6 shadow-lg shadow-black/40 text-white h-64 hover:border-discord border-2 border-transparent transition-all cursor-pointer"
+      onClick={() => router.push(`/group/${id}`)}
+    >
       <div className="flex items-start justify-between">
         <div className="space-y-1">
           <h2 className="text-xl font-semibold leading-tight">{name}</h2>
