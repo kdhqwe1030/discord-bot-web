@@ -1,3 +1,7 @@
+export interface ApiResponse<T> {
+  data?: T;
+  error?: string;
+}
 export const apiClient = {
   post: async (url: string, data?: any) => {
     return fetch(url, {
