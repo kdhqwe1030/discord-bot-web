@@ -20,7 +20,6 @@ interface GroupCardProps {
 }
 
 const GroupCard = ({
-  id,
   name,
   linkedGuildId,
   memberCount,
