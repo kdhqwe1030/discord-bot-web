@@ -11,7 +11,7 @@ const SignIn = ({ changeMode }: { changeMode: () => void }) => {
   const searchParams = useSearchParams();
 
   // ?next=/invite/xxx 없으면 기본 "/"
-  const next = searchParams.get("next") || "/";
+  const next = searchParams.get("next") || "/group";
 
   const [loginForm, setLoginForm] = useState({
     email: "",
