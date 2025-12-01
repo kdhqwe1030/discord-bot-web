@@ -1,4 +1,5 @@
 import { apiClient, ApiResponse } from "./client";
+import type { PollWithResults } from "@/types/poll";
 
 interface AddGroupsType {
   name: string;
@@ -28,6 +29,13 @@ interface Group {
   memberCount: number;
   userRole: string;
   members: GroupMember[];
+}
+
+interface PollsResponse {
+  polls: PollWithResults[];
+  hasMore: boolean;
+  nextPage: number | null;
+  totalCount: number;
 }
 
 export const groupAPI = {
@@ -95,6 +103,8 @@ export const groupAPI = {
       };
     }
   },
+
+  // 초대 링크 생성
   createInvite: async (groupId: string) => {
     const res = await fetch(`/api/groups/${groupId}/invites`, {
       method: "POST",
@@ -107,5 +117,22 @@ export const groupAPI = {
     }
 
     return data as { inviteUrl: string; invitation: any };
+  },
+
+  // 그룹 투표 목록 조회 (페이지네이션)
+  fetchGroupPolls: async (
+    groupId: string,
+    page: number = 0
+  ): Promise<PollsResponse> => {
+    const response = await apiClient.get(
+      `/api/groups/${groupId}/polls?page=${page}&limit=20`
+    );
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.error || "투표 목록 조회에 실패했습니다.");
+    }
+
+    return result;
   },
 };
