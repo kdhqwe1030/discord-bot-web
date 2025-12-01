@@ -1,23 +1,32 @@
+// components/auth/SignIn.tsx
 "use client";
+
 import { ChangeEvent, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { FaDiscord } from "react-icons/fa";
 import { authAPI } from "@/lib/api/auth";
+
 const SignIn = ({ changeMode }: { changeMode: () => void }) => {
-  const handleDiscordLogin = () => {
-    window.location.href = "/api/auth/discord/login";
-  };
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // ?next=/invite/xxx 없으면 기본 "/"
+  const next = searchParams.get("next") || "/group";
+
   const [loginForm, setLoginForm] = useState({
     email: "",
     password: "",
   });
   const [isLoading, setIsLoading] = useState(false);
+
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
-    setLoginForm({
-      ...loginForm,
+    setLoginForm((prev) => ({
+      ...prev,
       [id]: value,
-    });
+    }));
   };
+
   const handleSubmit = async (
     e:
       | React.MouseEvent<HTMLButtonElement>
@@ -36,8 +45,16 @@ const SignIn = ({ changeMode }: { changeMode: () => void }) => {
     }
 
     console.log("로그인 성공", data);
-    window.location.href = "/";
+    // next 파라미터로 돌아가기
+    router.push(next);
   };
+
+  const handleDiscordLogin = () => {
+    //디스코드 OAuth 라우트에 next 같이 보내기
+    const encodedNext = encodeURIComponent(next);
+    window.location.href = `/api/auth/discord/login?next=${encodedNext}`;
+  };
+
   return (
     <div className="p-8 w-100">
       <div className="w-full">

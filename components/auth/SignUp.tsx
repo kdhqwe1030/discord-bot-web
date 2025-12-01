@@ -61,7 +61,7 @@ const SignUp = ({ changeMode }: { changeMode: () => void }) => {
       }
 
       console.log("회원가입 성공", data);
-      alert("회원가입이 완료되었습니다! 로그인해주세요.");
+      alert("회원가입이 완료되었습니다! 이메일 인증 후 로그인해주세요.");
       changeMode(); // 로그인 페이지로 이동
     }
 

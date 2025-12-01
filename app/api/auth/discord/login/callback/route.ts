@@ -5,10 +5,15 @@ import { createClient } from "@/lib/supabase/supabaseServer";
 export async function GET(req: NextRequest) {
   const supabase = await createClient();
   const url = new URL(req.url);
+
   const code = url.searchParams.get("code");
+  const next = url.searchParams.get("next") || "/group"; // 없으면 "/"로
 
   if (!code) {
-    return NextResponse.redirect(new URL("/login?error=missing_code", url));
+    const redirectUrl = new URL("/login", url);
+    redirectUrl.searchParams.set("error", "missing_code");
+    redirectUrl.searchParams.set("next", next);
+    return NextResponse.redirect(redirectUrl);
   }
 
   // 1) 코드 -> 세션 교환
@@ -16,7 +21,10 @@ export async function GET(req: NextRequest) {
 
   if (error || !data.session) {
     console.error("OAuth login failed:", error);
-    return NextResponse.redirect(new URL("/login?error=auth_failed", url));
+    const redirectUrl = new URL("/login", url);
+    redirectUrl.searchParams.set("error", "auth_failed");
+    redirectUrl.searchParams.set("next", next);
+    return NextResponse.redirect(redirectUrl);
   }
 
   const session = data.session;
@@ -30,7 +38,10 @@ export async function GET(req: NextRequest) {
 
   if (userError || !user) {
     console.error("Failed to load user after OAuth:", userError);
-    return NextResponse.redirect(new URL("/login?error=user_not_found", url));
+    const redirectUrl = new URL("/login", url);
+    redirectUrl.searchParams.set("error", "user_not_found");
+    redirectUrl.searchParams.set("next", next);
+    return NextResponse.redirect(redirectUrl);
   }
 
   // 3) provider_token으로 디스코드 정보 가져오기
@@ -73,5 +84,9 @@ export async function GET(req: NextRequest) {
     console.warn("⚠️ No provider_token returned from session.");
   }
 
-  return NextResponse.redirect(new URL("/", url));
+  // ✅ 최종 리다이렉트: next 로 보내기
+  const base = process.env.NEXT_PUBLIC_URL || `${url.protocol}//${url.host}`;
+  const redirectUrl = new URL(next, base);
+
+  return NextResponse.redirect(redirectUrl);
 }

@@ -1,4 +1,4 @@
-import { apiClient } from "./client";
+import { apiClient, ApiResponse } from "./client";
 import type { User } from "@supabase/supabase-js";
 
 interface LoginData {
@@ -10,11 +10,6 @@ interface RegisterData {
   email: string;
   password: string;
   username: string;
-}
-
-interface ApiResponse<T> {
-  data?: T;
-  error?: string;
 }
 
 interface AuthRes {

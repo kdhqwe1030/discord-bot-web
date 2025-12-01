@@ -7,7 +7,7 @@ export async function POST(req: Request) {
 
   if (!email || !password) {
     return NextResponse.json(
-      { error: "Email and password are required" },
+      { error: "supabase에서 온 이메일을 인증 후 로그인이 가능합니다." },
       { status: 400 }
     );
   }
