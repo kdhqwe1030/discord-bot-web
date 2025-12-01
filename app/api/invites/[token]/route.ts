@@ -12,7 +12,7 @@ interface RouteParams {
 export async function GET(_req: Request, { params }: RouteParams) {
   const supabase = await createClient();
   const { token } = await params;
-  console.log("📌 [page.tsx] token =", token);
+
   const { data, error } = await supabase
     .from("group_invitations")
     .select("*, groups(name)")
@@ -26,7 +26,7 @@ export async function GET(_req: Request, { params }: RouteParams) {
     );
   }
 
-  // 만료 체크 (expires_at < now 이면 만료)
+  // 만료 체크
   if (data.expires_at && new Date(data.expires_at) < new Date()) {
     return NextResponse.json(
       { error: "만료된 초대 링크입니다." },
@@ -34,9 +34,10 @@ export async function GET(_req: Request, { params }: RouteParams) {
     );
   }
 
-  if (data.status !== "pending") {
+  // 취소된 초대만 막기
+  if (data.status === "cancelled") {
     return NextResponse.json(
-      { error: "이미 처리된 초대 링크입니다." },
+      { error: "취소된 초대 링크입니다." },
       { status: 400 }
     );
   }
@@ -84,11 +85,8 @@ export async function POST(_req: Request, { params }: RouteParams) {
     return NextResponse.json({ error: "만료된 초대입니다." }, { status: 400 });
   }
 
-  if (invite.status !== "pending") {
-    return NextResponse.json(
-      { error: "이미 처리된 초대입니다." },
-      { status: 400 }
-    );
+  if (invite.status === "cancelled") {
+    return NextResponse.json({ error: "취소된 초대입니다." }, { status: 400 });
   }
 
   // 4) 이미 멤버인지 체크
@@ -111,18 +109,25 @@ export async function POST(_req: Request, { params }: RouteParams) {
     }
   }
 
-  // 5) 초대 상태 업데이트
-  const { error: updateError } = await supabase
-    .from("group_invitations")
-    .update({
-      status: "accepted",
-      invitee_id: user.id,
-      accepted_at: new Date().toISOString(),
-    })
-    .eq("id", invite.id);
+  // 5) 초대 레코드 업데이트 (로그용)
+  const updateFields: Record<string, any> = {};
 
-  if (updateError) {
-    return NextResponse.json({ error: updateError.message }, { status: 500 });
+  if (!invite.accepted_at) {
+    updateFields.accepted_at = new Date().toISOString();
+  }
+  if (invite.status === "pending") {
+    updateFields.status = "accepted";
+  }
+
+  if (Object.keys(updateFields).length > 0) {
+    const { error: updateError } = await supabase
+      .from("group_invitations")
+      .update(updateFields)
+      .eq("id", invite.id);
+
+    if (updateError) {
+      return NextResponse.json({ error: updateError.message }, { status: 500 });
+    }
   }
 
   return NextResponse.json({ success: true, groupId: invite.group_id });
