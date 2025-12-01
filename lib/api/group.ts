@@ -95,4 +95,17 @@ export const groupAPI = {
       };
     }
   },
+  createInvite: async (groupId: string) => {
+    const res = await fetch(`/api/groups/${groupId}/invites`, {
+      method: "POST",
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error || "초대 링크 생성에 실패했습니다.");
+    }
+
+    return data as { inviteUrl: string; invitation: any };
+  },
 };
