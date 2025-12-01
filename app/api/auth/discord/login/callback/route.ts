@@ -7,7 +7,7 @@ export async function GET(req: NextRequest) {
   const url = new URL(req.url);
 
   const code = url.searchParams.get("code");
-  const next = url.searchParams.get("next") || "/"; // 없으면 "/"로
+  const next = url.searchParams.get("next") || "/group"; // 없으면 "/"로
 
   if (!code) {
     const redirectUrl = new URL("/login", url);
