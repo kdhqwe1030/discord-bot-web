@@ -20,9 +20,9 @@ export const userAPI = {
       };
     }
   },
-  addRiotAccount: async (riotUsername: string) => {
+  addRiotAccount: async (gameName: string, tagLine: string) => {
     try {
-      const res = await api.post("/user/riot", { riotUsername });
+      const res = await api.post("/riot/link-account", { gameName, tagLine });
       return res.data;
     } catch (error: any) {
       return {
@@ -37,7 +37,8 @@ export const userAPI = {
       return { data: res.data.invitation as Invitation };
     } catch (error: any) {
       return {
-        error: error.response?.data?.error || "초대 정보를 불러오지 못했습니다.",
+        error:
+          error.response?.data?.error || "초대 정보를 불러오지 못했습니다.",
       };
     }
   },
@@ -47,7 +48,8 @@ export const userAPI = {
       return { data: res.data };
     } catch (error: any) {
       return {
-        error: error.response?.data?.error || "초대 수락 중 오류가 발생했습니다.",
+        error:
+          error.response?.data?.error || "초대 수락 중 오류가 발생했습니다.",
       };
     }
   },

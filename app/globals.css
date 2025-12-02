@@ -138,7 +138,8 @@
 
   /* Discord */
   --color-discord: #5865f2;
-
+  --color-riot: #d13639;
+  --color-riot-dark: #c22d2b;
   /* Fonts */
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
