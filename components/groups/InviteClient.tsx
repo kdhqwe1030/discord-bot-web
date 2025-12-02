@@ -84,7 +84,7 @@ const InviteClient = ({ token }: InviteClientProps) => {
 
   if (error) {
     return (
-      <div className="h-screen flex items-center justify-center text-red-400">
+      <div className="h-screen flex items-center justify-center text-error ">
         {error}
       </div>
     );
@@ -106,7 +106,7 @@ const InviteClient = ({ token }: InviteClientProps) => {
 
   return (
     <main className="h-screen flex items-center justify-center bg-background text-foreground">
-      <div className="w-full max-w-md rounded-2xl bg-sub2 p-6 shadow-lg">
+      <div className="w-full max-w-md rounded-2xl bg-surface-1  p-6 shadow-lg">
         <h1 className="text-xl font-semibold mb-2">그룹 초대</h1>
         <p className="text-sm text-gray-300 mb-4">
           <span className="font-semibold text-main">{groupName}</span> 그룹에
@@ -115,25 +115,25 @@ const InviteClient = ({ token }: InviteClientProps) => {
 
         {!loggedIn ? (
           <>
-            <p className="text-sm text-gray-400 mb-4">
+            <p className="text-sm text-text-3  mb-4">
               참여하려면 먼저 로그인해 주세요.
             </p>
             <button
               onClick={handleGoLogin}
-              className="w-full p-3 bg-main text-white rounded-md text-sm font-semibold hover:bg-main/80 transition"
+              className="w-full p-3 bg-primary text-text-1  rounded-md text-sm font-semibold hover:bg-main/80 transition"
             >
               로그인하고 참여하기
             </button>
           </>
         ) : (
           <>
-            <p className="text-sm text-gray-400 mb-4">
+            <p className="text-sm text-text-3  mb-4">
               <span className="font-semibold">{displayName}</span> 님으로 이
               그룹에 참여하시겠어요?
             </p>
             <button
               onClick={handleAccept}
-              className="w-full p-3 bg-main text-white rounded-md text-sm font-semibold hover:bg-main/80 transition"
+              className="w-full p-3 bg-primary text-text-1  rounded-md text-sm font-semibold hover:bg-main/80 transition"
             >
               그룹 참여하기
             </button>

@@ -122,13 +122,13 @@ const AddGroupModal = ({ isOpen, onClose }: AddGroupModalProps) => {
 
   return (
     <Modal isOpen={isOpen} onClose={onCloseModal}>
-      <h2 className="text-lg font-semibold text-white">새 그룹 만들기</h2>
+      <h2 className="text-lg font-semibold text-text-1 ">새 그룹 만들기</h2>
       {step === 1 ? (
-        <p className="mt-1 text-sm text-gray-400">
+        <p className="mt-1 text-sm text-text-3 ">
           함께 게임할 그룹을 생성해보세요!
         </p>
       ) : (
-        <p className="mt-1 text-sm text-gray-400">
+        <p className="mt-1 text-sm text-text-3 ">
           기존 디스코드 채널과 연결할 수 있습니다!
         </p>
       )}
@@ -138,7 +138,7 @@ const AddGroupModal = ({ isOpen, onClose }: AddGroupModalProps) => {
           <div>
             <label className="text-sm text-gray-300">그룹 이름</label>
             <input
-              className="mt-1 w-full rounded-md bg-sub3 px-3 py-2 text-sm text-white outline-none ring-1 ring-sub3 focus:ring-2 focus:ring-discord"
+              className="mt-1 w-full rounded-md bg-surface-3  px-3 py-2 text-sm text-text-1  outline-none ring-1 ring-sub3 focus:ring-2 focus:ring-discord"
               placeholder="예) Midnight Gamers"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -152,11 +152,11 @@ const AddGroupModal = ({ isOpen, onClose }: AddGroupModalProps) => {
             <button
               type="button"
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="mt-1 w-full rounded-md bg-sub3 px-3 py-2 text-sm text-white outline-none ring-1 ring-sub3 focus:ring-2 focus:ring-discord flex justify-between items-center"
+              className="mt-1 w-full rounded-md bg-surface-3  px-3 py-2 text-sm text-text-1  outline-none ring-1 ring-sub3 focus:ring-2 focus:ring-discord flex justify-between items-center"
               disabled={guildsLoading}
             >
               <span
-                className={selectedGuildName ? "text-white" : "text-gray-400"}
+                className={selectedGuildName ? "text-text-1 " : "text-text-3 "}
               >
                 {guildsLoading ? "로딩 중..." : selectedGuildName || "선택하기"}
               </span>
@@ -179,9 +179,9 @@ const AddGroupModal = ({ isOpen, onClose }: AddGroupModalProps) => {
 
             {/* 드롭다운 리스트 */}
             {isDropdownOpen && !guildsLoading && (
-              <div className="absolute z-10 mt-1 w-full rounded-md bg-sub3 shadow-lg max-h-60 overflow-y-auto ring-1 ring-black ring-opacity-5">
+              <div className="absolute z-10 mt-1 w-full rounded-md bg-surface-3  shadow-lg max-h-60 overflow-y-auto ring-1 ring-black ring-opacity-5">
                 {guilds.length === 0 ? (
-                  <div className="px-3 py-2 text-sm text-gray-400">
+                  <div className="px-3 py-2 text-sm text-text-3 ">
                     연동된 디스코드 서버가 없습니다.
                   </div>
                 ) : (
@@ -190,7 +190,7 @@ const AddGroupModal = ({ isOpen, onClose }: AddGroupModalProps) => {
                       key={guild.id}
                       type="button"
                       onClick={() => handleSelectGuild(guild)}
-                      className="w-full px-3 py-2 text-left text-sm text-white hover:bg-discord/20 transition flex items-center gap-2"
+                      className="w-full px-3 py-2 text-left text-sm text-text-1  hover:bg-discord/20 transition flex items-center gap-2"
                     >
                       {guild.icon && (
                         <img
@@ -208,14 +208,14 @@ const AddGroupModal = ({ isOpen, onClose }: AddGroupModalProps) => {
           </div>
         )}
 
-        {errorMsg && <p className="text-xs text-red-400 mt-1">{errorMsg}</p>}
+        {errorMsg && <p className="text-xs text-error  mt-1">{errorMsg}</p>}
 
         <div className="mt-2 flex justify-end gap-2">
           {step === 1 ? (
             <button
               type="button"
               onClick={onCloseModal}
-              className="rounded-md px-3 py-1.5 text-xs text-gray-300 hover:bg-sub3 transition"
+              className="rounded-md px-3 py-1.5 text-xs text-gray-300 hover:bg-surface-3  transition"
             >
               취소
             </button>
@@ -223,7 +223,7 @@ const AddGroupModal = ({ isOpen, onClose }: AddGroupModalProps) => {
             <button
               type="button"
               onClick={onCloseModal}
-              className="rounded-md px-3 py-1.5 text-xs text-gray-300 hover:bg-sub3 transition"
+              className="rounded-md px-3 py-1.5 text-xs text-gray-300 hover:bg-surface-3  transition"
             >
               건너뛰기
             </button>
@@ -232,7 +232,7 @@ const AddGroupModal = ({ isOpen, onClose }: AddGroupModalProps) => {
           {step === 1 ? (
             <button
               type="button"
-              className="rounded-md bg-discord px-4 py-1.5 text-xs font-medium text-white hover:bg-discord/90 disabled:opacity-60 disabled:cursor-not-allowed transition"
+              className="rounded-md bg-discord px-4 py-1.5 text-xs font-medium text-text-1  hover:bg-discord/90 disabled:opacity-60 disabled:cursor-not-allowed transition"
               onClick={(event) => handleNextStep(event)}
             >
               다음
@@ -241,7 +241,7 @@ const AddGroupModal = ({ isOpen, onClose }: AddGroupModalProps) => {
             <button
               type="submit"
               disabled={loading}
-              className="rounded-md bg-discord px-4 py-1.5 text-xs font-medium text-white hover:bg-discord/90 disabled:opacity-60 disabled:cursor-not-allowed transition"
+              className="rounded-md bg-discord px-4 py-1.5 text-xs font-medium text-text-1  hover:bg-discord/90 disabled:opacity-60 disabled:cursor-not-allowed transition"
             >
               {loading ? "생성 중..." : "디스코드 채널 연결"}
             </button>

@@ -56,8 +56,8 @@ const GroupInviteModal = ({
 
   return (
     <Modal isOpen={isOpen} onClose={handleClose}>
-      <h2 className="text-lg font-semibold text-white">그룹 초대 링크</h2>
-      <p className="mt-1 text-sm text-gray-400">
+      <h2 className="text-lg font-semibold text-text-1 ">그룹 초대 링크</h2>
+      <p className="mt-1 text-sm text-text-3 ">
         {groupName ? (
           <>
             <span className="font-medium text-discord">{groupName}</span> 그룹에
@@ -75,7 +75,7 @@ const GroupInviteModal = ({
             type="button"
             onClick={() => createInviteMutation.mutate()}
             disabled={createInviteMutation.isPending}
-            className="w-full rounded-md bg-discord px-4 py-2 text-sm font-medium text-white hover:bg-discord/90 disabled:opacity-60 disabled:cursor-not-allowed transition"
+            className="w-full rounded-md bg-discord px-4 py-2 text-sm font-medium text-text-1  hover:bg-discord/90 disabled:opacity-60 disabled:cursor-not-allowed transition"
           >
             {createInviteMutation.isPending
               ? "생성 중..."
@@ -91,12 +91,12 @@ const GroupInviteModal = ({
               <input
                 readOnly
                 value={inviteUrl}
-                className="flex-1 rounded-md bg-sub3 px-3 py-2 text-xs text-white outline-none ring-1 ring-sub3 focus:ring-2 focus:ring-discord"
+                className="flex-1 rounded-md bg-surface-3  px-3 py-2 text-xs text-text-1  outline-none ring-1 ring-sub3 focus:ring-2 focus:ring-discord"
               />
               <button
                 type="button"
                 onClick={handleCopy}
-                className="whitespace-nowrap rounded-md bg-main px-3 py-2 text-xs font-medium text-white hover:bg-main/80 transition"
+                className="whitespace-nowrap rounded-md bg-primary px-3 py-2 text-xs font-medium text-text-1  hover:bg-main/80 transition"
               >
                 {copied ? "복사 완료!" : "복사"}
               </button>
@@ -110,7 +110,7 @@ const GroupInviteModal = ({
               type="button"
               onClick={() => createInviteMutation.mutate()}
               disabled={createInviteMutation.isPending}
-              className="mt-2 text-[11px] text-gray-400 hover:text-gray-200 underline-offset-2 hover:underline"
+              className="mt-2 text-[11px] text-text-3  hover:text-gray-200 underline-offset-2 hover:underline"
             >
               {createInviteMutation.isPending
                 ? "다시 생성 중..."
@@ -120,7 +120,7 @@ const GroupInviteModal = ({
         )}
 
         {errorMsg && (
-          <p className="text-xs text-red-400 mt-1 whitespace-pre-line">
+          <p className="text-xs text-error  mt-1 whitespace-pre-line">
             {errorMsg}
           </p>
         )}
@@ -129,7 +129,7 @@ const GroupInviteModal = ({
           <button
             type="button"
             onClick={handleClose}
-            className="rounded-md px-3 py-1.5 text-xs text-gray-300 hover:bg-sub3 transition"
+            className="rounded-md px-3 py-1.5 text-xs text-gray-300 hover:bg-surface-3  transition"
           >
             닫기
           </button>

@@ -26,7 +26,7 @@ export default function LoginPage() {
     <Suspense
       fallback={
         <main className="flex flex-col items-center justify-center h-screen bg-background text-foreground">
-          <div className="text-gray-400">로딩 중...</div>
+          <div className="text-text-3 ">로딩 중...</div>
         </main>
       }
     >

@@ -30,7 +30,7 @@ const eachGroupPage = async ({ params }: EachGroupPageProps) => {
 
   if (groupError || !group) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-red-400">
+      <div className="min-h-screen flex items-center justify-center text-error ">
         그룹을 찾을 수 없습니다.
       </div>
     );
@@ -46,7 +46,7 @@ const eachGroupPage = async ({ params }: EachGroupPageProps) => {
 
   if (memberError || !membership) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-red-400">
+      <div className="min-h-screen flex items-center justify-center text-error ">
         이 그룹에 접근 권한이 없습니다.
       </div>
     );
@@ -124,22 +124,22 @@ const eachGroupPage = async ({ params }: EachGroupPageProps) => {
     <div className="min-h-screen flex bg-background text-foreground p-6 gap-6">
       {/* 🔹 LEFT — 그룹 Summary 영역 */}
       <aside className="w-1/4 flex flex-col gap-4">
-        <div className="bg-sub2 rounded-xl p-4">
-          <h2 className="text-lg font-semibold">Group Summary</h2>
-          <p className="text-sm text-gray-400 mt-1">• 그룹명: {group.name}</p>
-          <p className="text-sm text-gray-400">
+        <div className="bg-surface-1 border border-border rounded-xl p-4">
+          <h2 className="text-lg font-semibold text-text-1">Group Summary</h2>
+          <p className="text-sm text-text-3 mt-1">• 그룹명: {group.name}</p>
+          <p className="text-sm text-text-3">
             • 멤버 수: {membersWithProfiles.length}명
           </p>
-          <p className="text-sm text-gray-400">• 내 역할: {membership.role}</p>
+          <p className="text-sm text-text-3">• 내 역할: {membership.role}</p>
           {discordGuildInfo && (
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-text-3">
               • Discord: {discordGuildInfo.name}
             </p>
           )}
         </div>
 
-        <div className="bg-sub2 rounded-xl p-4">
-          <h3 className="text-sm font-semibold mb-2">Members</h3>
+        <div className="bg-surface-1 border border-border rounded-xl p-4">
+          <h3 className="text-sm font-semibold mb-2 text-text-1">Members</h3>
           <div className="space-y-2">
             {membersWithProfiles.map((member) => (
               <div
@@ -153,20 +153,20 @@ const eachGroupPage = async ({ params }: EachGroupPageProps) => {
                     className="w-6 h-6 rounded-full"
                   />
                 )}
-                <span className="text-white">{member.username}</span>
+                <span className="text-text-1">{member.username}</span>
                 {member.role === "owner" ? (
-                  <span className="text-gray-400 text-[10px]">그룹장</span>
+                  <span className="text-text-3 text-[10px]">그룹장</span>
                 ) : member.role === "admin" ? (
-                  <span className="text-gray-400 text-[10px]">관리자</span>
+                  <span className="text-text-3 text-[10px]">관리자</span>
                 ) : null}
               </div>
             ))}
           </div>
         </div>
 
-        <div className="bg-sub2 rounded-xl p-4">
-          <h3 className="text-sm font-semibold mb-2">Invite</h3>
-          <p className="text-gray-400 text-xs mb-2">
+        <div className="bg-surface-1 border border-border rounded-xl p-4">
+          <h3 className="text-sm font-semibold mb-2 text-text-1">Invite</h3>
+          <p className="text-text-3 text-xs mb-2">
             그룹 초대 버튼 또는 초대 링크 생성
           </p>
           <GroupInviteButton groupId={groupId} groupName={group.name} />
@@ -175,32 +175,18 @@ const eachGroupPage = async ({ params }: EachGroupPageProps) => {
 
       {/* 🔸 RIGHT — 메인 영역 */}
       <section className="flex-1 flex flex-col gap-6">
-        {/* 상단 통계 카드 영역
-        <section className="grid grid-cols-4 gap-4">
-          <div className="bg-sub2 rounded-xl h-32 p-4 flex flex-col justify-center">
-            <span className="text-sm text-gray-400">Group Win Rate</span>
-            <span className="text-2xl font-bold text-green-400 mt-2">--%</span>
-          </div>
-          <div className="bg-sub2 rounded-xl h-32 p-4">MVP 카드 자리</div>
-          <div className="bg-sub2 rounded-xl h-32 p-4">Feeder 카드 자리</div>
-          <div className="bg-sub2 rounded-xl h-32 p-4">
-            Best Combo 카드 자리
-          </div>
-        </section> */}
-
         {/* 탭 영역 */}
-        <section className="flex flex-col flex-1 bg-sub2 rounded-xl">
+        <section className="flex flex-col flex-1 ">
           {/* 탭 헤더 */}
-          <div className="border-b border-sub3 flex gap-6 px-4 py-2 text-sm font-medium">
-            <button className="text-main">Vote</button>
-            <button className="text-gray-400 hover:text-white">Matches</button>
+          <div className="border-b border-divider flex gap-6 px-4 py-2 text-sm font-medium">
+            <button className="text-primary border-b-2 border-primary pb-2">
+              Vote
+            </button>
+            <button className="text-text-3 hover:text-text-1 pb-2">
+              Matches
+            </button>
           </div>
 
-          {/* 탭 컨텐츠 */}
-          <div className="flex-1 p-4 text-gray-400 text-sm">
-            - 투표 리스트 or 경기 기록 리스트 표시 영역 - 여기 안에서
-            react-query / infinite scroll
-          </div>
           <PollList groupId={groupId} />
         </section>
       </section>

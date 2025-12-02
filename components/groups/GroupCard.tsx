@@ -31,7 +31,7 @@ const GroupCard = ({
   const router = useRouter();
   return (
     <div
-      className="w-full bg-sub2 rounded-2xl p-6 shadow-lg shadow-black/40 text-white h-64 hover:border-discord border-2 border-transparent transition-all cursor-pointer"
+      className="w-full bg-surface-1  rounded-2xl p-6 shadow-lg shadow-black/40 text-text-1  h-64 hover:border-discord border-2 border-transparent transition-all cursor-pointer"
       onClick={() => router.push(`/group/${id}`)}
     >
       <div className="flex items-start justify-between">
@@ -45,15 +45,15 @@ const GroupCard = ({
           )}
         </div>
 
-        <div className="inline-flex items-center rounded-full bg-sub3/70 px-3 py-1 text-xs text-gray-300 border border-white/5">
+        <div className="inline-flex items-center rounded-full bg-surface-3 /70 px-3 py-1 text-xs text-gray-300 border border-white/5">
           <span className="mr-1 font-medium">{memberCount}</span>
           <span>members</span>
         </div>
       </div>
 
       <div className="mt-5 flex gap-4">
-        <div className="flex-1 rounded-xl bg-sub3 px-4 py-3 flex flex-col justify-between">
-          <span className="text-[11px] uppercase tracking-[0.12em] text-gray-400">
+        <div className="flex-1 rounded-xl bg-surface-3  px-4 py-3 flex flex-col justify-between">
+          <span className="text-[11px] uppercase tracking-[0.12em] text-text-3 ">
             Role
           </span>
           <span className="mt-2 text-lg font-semibold text-discord capitalize">
@@ -61,11 +61,11 @@ const GroupCard = ({
           </span>
         </div>
 
-        <div className="flex-1 rounded-xl bg-sub3 px-4 py-3 flex flex-col justify-between">
-          <span className="text-[11px] uppercase tracking-[0.12em] text-gray-400">
+        <div className="flex-1 rounded-xl bg-surface-3  px-4 py-3 flex flex-col justify-between">
+          <span className="text-[11px] uppercase tracking-[0.12em] text-text-3 ">
             Status
           </span>
-          <span className="mt-2 text-lg font-semibold text-green-400">
+          <span className="mt-2 text-lg font-semibold text-success ">
             Active
           </span>
         </div>
@@ -77,7 +77,7 @@ const GroupCard = ({
           <UserProfile key={member.userId} imgUrl={member.avatarUrl} />
         ))}
         {memberCount > 4 && (
-          <span className="flex h-8 px-3 items-center justify-center rounded-full bg-sub3 text-xs font-medium">
+          <span className="flex h-8 px-3 items-center justify-center rounded-full bg-surface-3  text-xs font-medium">
             +{memberCount - 4}
           </span>
         )}
