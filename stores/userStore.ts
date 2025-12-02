@@ -13,13 +13,13 @@ export type ApiUserResponse = {
 };
 
 interface UserState {
-  data: ApiUserResponse | null;
+  userData: ApiUserResponse | null;
   setData: (data: ApiUserResponse | null) => void;
   clear: () => void;
 }
 
 export const useUserStore = create<UserState>((set) => ({
-  data: null,
-  setData: (data) => set({ data }),
-  clear: () => set({ data: null }),
+  userData: null,
+  setData: (userData) => set({ userData }),
+  clear: () => set({ userData: null }),
 }));

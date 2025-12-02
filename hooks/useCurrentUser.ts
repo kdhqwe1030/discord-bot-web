@@ -6,7 +6,7 @@ import { useUserStore, ApiUserResponse } from "@/stores/userStore";
 import { userAPI } from "@/lib/api/user";
 
 export function useCurrentUser() {
-  const storeData = useUserStore((s) => s.data);
+  const storeData = useUserStore((s) => s.userData);
   const setStoreData = useUserStore((s) => s.setData);
 
   const { data, isLoading, isError, error, refetch, isFetching } =

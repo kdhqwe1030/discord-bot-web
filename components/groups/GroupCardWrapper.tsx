@@ -6,7 +6,7 @@ import { groupAPI } from "@/lib/api/group";
 import { useUserStore } from "@/stores/userStore";
 
 const GroupCardWrapper = () => {
-  const { data: userData } = useUserStore();
+  const { userData } = useUserStore();
   const userId = userData?.user?.id || "";
 
   const {

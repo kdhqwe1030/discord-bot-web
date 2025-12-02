@@ -18,8 +18,8 @@ interface DiscordGuild {
 }
 
 const AddGroupModal = ({ isOpen, onClose }: AddGroupModalProps) => {
-  const { data } = useUserStore();
-  const userId = data?.user?.id;
+  const { userData } = useUserStore();
+  const userId = userData?.user?.id;
 
   const [name, setName] = useState("");
   const [selectedGuildId, setSelectedGuildId] = useState("");
