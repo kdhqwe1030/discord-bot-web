@@ -1,5 +1,5 @@
 import GroupInviteButton from "@/components/groups/GroupInviteButton";
-import PollList from "@/components/groups/PollList";
+import PollList from "@/components/groups/section/PollList";
 import { createClient } from "@/lib/supabase/supabaseServer";
 import { redirect } from "next/navigation";
 
@@ -154,9 +154,11 @@ const eachGroupPage = async ({ params }: EachGroupPageProps) => {
                   />
                 )}
                 <span className="text-white">{member.username}</span>
-                <span className="text-gray-400 text-[10px]">
-                  ({member.role})
-                </span>
+                {member.role === "owner" ? (
+                  <span className="text-gray-400 text-[10px]">그룹장</span>
+                ) : member.role === "admin" ? (
+                  <span className="text-gray-400 text-[10px]">관리자</span>
+                ) : null}
               </div>
             ))}
           </div>
@@ -173,7 +175,7 @@ const eachGroupPage = async ({ params }: EachGroupPageProps) => {
 
       {/* 🔸 RIGHT — 메인 영역 */}
       <section className="flex-1 flex flex-col gap-6">
-        {/* 상단 통계 카드 영역 */}
+        {/* 상단 통계 카드 영역
         <section className="grid grid-cols-4 gap-4">
           <div className="bg-sub2 rounded-xl h-32 p-4 flex flex-col justify-center">
             <span className="text-sm text-gray-400">Group Win Rate</span>
@@ -184,7 +186,7 @@ const eachGroupPage = async ({ params }: EachGroupPageProps) => {
           <div className="bg-sub2 rounded-xl h-32 p-4">
             Best Combo 카드 자리
           </div>
-        </section>
+        </section> */}
 
         {/* 탭 영역 */}
         <section className="flex flex-col flex-1 bg-sub2 rounded-xl">
