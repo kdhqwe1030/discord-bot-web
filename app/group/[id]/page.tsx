@@ -178,15 +178,12 @@ const eachGroupPage = async ({ params }: EachGroupPageProps) => {
         {/* 탭 영역 */}
         <section className="flex flex-col flex-1 ">
           {/* 탭 헤더 */}
-          <div className="border-b border-divider flex gap-6 px-4 py-2 text-sm font-medium">
+          <div className="border-b border-divider flex gap-6 px-4 py-2 text-md font-medium">
             <button className="text-primary border-b-2 border-primary pb-2">
-              Vote
+              투표 기록
             </button>
-            <button className="text-text-3 hover:text-text-1 pb-2">
-              Matches
-            </button>
+            <button className="text-text-2 hover:text-text-1 pb-2">매치</button>
           </div>
-
           <PollList groupId={groupId} />
         </section>
       </section>
