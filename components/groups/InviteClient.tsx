@@ -4,6 +4,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { userAPI } from "@/lib/api/user";
 
 interface Invitation {
   group_id: string;
@@ -25,21 +26,15 @@ const InviteClient = ({ token }: InviteClientProps) => {
   // 초대 정보 가져오기
   useEffect(() => {
     const fetchInvite = async () => {
-      try {
-        const res = await fetch(`/api/invites/${token}`);
-        const data = await res.json();
+      const result = await userAPI.fetchInvite(token);
 
-        if (!res.ok) {
-          setError(data.error || "유효하지 않은 초대 링크입니다.");
-          setInvitation(null);
-        } else {
-          setInvitation(data.invitation);
-        }
-      } catch (e) {
-        setError("초대 정보를 불러오지 못했습니다.");
-      } finally {
-        setInvLoading(false);
+      if (result.error) {
+        setError(result.error);
+        setInvitation(null);
+      } else {
+        setInvitation(result.data!);
       }
+      setInvLoading(false);
     };
 
     fetchInvite();
@@ -51,26 +46,16 @@ const InviteClient = ({ token }: InviteClientProps) => {
   };
 
   const handleAccept = async () => {
-    try {
-      const res = await fetch(`/api/invites/${token}`, {
-        method: "POST",
-      });
-      const data = await res.json();
+    const result = await userAPI.acceptInvite(token);
 
-      if (!res.ok) {
-        alert(data.error || "초대 수락에 실패했습니다.");
-        return;
-      }
-
-      // ✅ 실제 라우트에 맞게 경로 맞춰주자
-      // 그룹 상세 페이지가 /group/[id] 라우트면:
-      if (data.groupId) {
-        router.push(`/group/${data.groupId}`);
-      } else {
-        router.push("/group");
-      }
-    } catch (e) {
-      alert("초대 수락 중 오류가 발생했습니다.");
+    if (result.error) {
+      alert(result.error);
+      return;
+    }
+    if (result.data?.groupId) {
+      router.push(`/group/${result.data.groupId}`);
+    } else {
+      router.push("/group");
     }
   };
 
