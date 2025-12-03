@@ -30,6 +30,8 @@ export function useCurrentUser() {
     discordLinked: effectiveData?.discordLinked ?? false,
     discordProfile: effectiveData?.discordProfile ?? null,
     discordData: effectiveData?.discordData ?? null,
+    lolAccount: effectiveData?.lolAccount ?? null,
+    riotLinked: effectiveData?.riotLinked ?? false,
     loading: isLoading || isFetching,
     isError,
     error,

@@ -34,9 +34,20 @@ export async function GET() {
     console.error("discord_profiles select error:", profileError);
   }
 
+  // 3. 라이엇 계정 정보 조회
+  const { data: lolAccount, error: lolError } = await supabase
+    .from("lol_accounts")
+    .select("*")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (lolError) {
+    console.error("lol_accounts select error:", lolError);
+  }
+
   let discordData = null;
 
-  // 3. 디스코드 연동이 되어 있다면, 관련 데이터들 같이 가져오기 (예시)
+  // 4. 디스코드 연동이 되어 있다면, 관련 데이터들 같이 가져오기 (예시)
   if (discordProfile) {
     const [
       { data: groupsOwned },
@@ -67,6 +78,8 @@ export async function GET() {
     user,
     discordLinked: !!discordProfile,
     discordProfile: discordProfile ?? null,
+    lolAccount: lolAccount ?? null,
+    riotLinked: !!lolAccount,
     discordData,
   });
 }
