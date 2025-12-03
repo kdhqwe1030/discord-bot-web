@@ -44,6 +44,7 @@ const RiotLinkModal = ({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["currentUser"] });
       onCloseModal();
+      alert("라이엇 계정이 연동되었습니다.");
     },
     onError: (error: any) => {
       setErrorMsg(error?.message ?? "라이엇 계정 연결에 실패했습니다.");
