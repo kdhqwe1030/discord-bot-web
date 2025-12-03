@@ -43,9 +43,7 @@ export default function Header() {
     tierFlex: lolAccount?.tier_flex ?? "",
     isMini: true,
   });
-  console.log(rankImg);
-  console.log(rankImg);
-  console.log(rankImg);
+
   const handleLogout = async () => {
     await authAPI.logout(); // 로그아웃 API 호출
     router.refresh();
