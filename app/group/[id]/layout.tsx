@@ -1,8 +1,8 @@
-import GroupInviteButton from "@/components/groups/GroupInviteButton";
-import RiotLinkButton from "@/components/ui/Buttons/RiotLinkButton";
 import { createClient } from "@/lib/supabase/supabaseServer";
 import { redirect } from "next/navigation";
-import Link from "next/link";
+import MemberSection from "@/components/groups/section/MemberSection";
+import SummarySection from "@/components/groups/section/SummarySection";
+import type { MemberWithProfile } from "@/types/group";
 
 interface GroupLayoutProps {
   children: React.ReactNode;
@@ -60,14 +60,29 @@ const GroupLayout = async ({ children, params }: GroupLayoutProps) => {
     .select("user_id, role, joined_at")
     .eq("group_id", groupId);
 
+  const memberIds = (members || []).map((m) => m.user_id);
+
+  // 4-1. 각 멤버의 LoL 계정 정보 (tier_flex만)
+  const { data: riotAccounts } = await supabase
+    .from("lol_accounts")
+    .select("user_id, tier_flex")
+    .in(
+      "user_id",
+      memberIds.length ? memberIds : ["00000000-0000-0000-0000-000000000000"]
+    );
+
+  const riotByUser = new Map((riotAccounts || []).map((r) => [r.user_id, r]));
+
   // 5. 각 멤버의 Discord 프로필 정보 가져오기
-  const membersWithProfiles = await Promise.all(
+  const membersWithProfiles: MemberWithProfile[] = await Promise.all(
     (members || []).map(async (member: any) => {
       const { data: discordProfile } = await supabase
         .from("discord_profiles")
         .select("avatar_url, username, discord_id")
         .eq("user_id", member.user_id)
-        .single();
+        .maybeSingle();
+
+      const riot = riotByUser.get(member.user_id);
 
       return {
         userId: member.user_id,
@@ -76,99 +91,55 @@ const GroupLayout = async ({ children, params }: GroupLayoutProps) => {
         avatarUrl: discordProfile?.avatar_url || "",
         username: discordProfile?.username || "Unknown",
         discordId: discordProfile?.discord_id || "",
+        hasDiscord: !!discordProfile,
+        hasRiot: !!riot,
+        tierFlex: riot?.tier_flex ?? null,
+        matchCount: null,
+        winRate: null,
       };
     })
   );
 
-  // 6. 디스코드 서버 정보 (linked_guild_id가 있는 경우)
-  let discordGuildInfo = null;
+  // 6. 디스코드 서버 정보
+  let discordGuildInfo: {
+    id: string;
+    name: string;
+    icon: string | null;
+  } | null = null;
+
   if (group.linked_guild_id) {
-    const { data: profile } = await supabase
-      .from("discord_profiles")
-      .select("access_token")
-      .eq("user_id", user.id)
-      .single();
+    const { data: guild } = await supabase
+      .from("guilds")
+      .select("id, name, icon")
+      .eq("id", group.linked_guild_id)
+      .maybeSingle();
 
-    if (profile?.access_token) {
-      try {
-        const guildRes = await fetch(
-          `https://discord.com/api/guilds/${group.linked_guild_id}`,
-          {
-            headers: { Authorization: `Bearer ${profile.access_token}` },
-          }
-        );
-
-        if (guildRes.ok) {
-          const guildData = await guildRes.json();
-          discordGuildInfo = {
-            id: guildData.id,
-            name: guildData.name,
-            icon: guildData.icon
-              ? `https://cdn.discordapp.com/icons/${guildData.id}/${guildData.icon}.png`
-              : null,
-          };
-        }
-      } catch (e) {
-        console.error("Failed to fetch Discord guild info:", e);
-      }
+    if (guild) {
+      discordGuildInfo = {
+        id: guild.id,
+        name: guild.name,
+        icon: guild.icon,
+      };
     }
   }
 
   return (
     <div className="min-h-screen flex bg-background text-foreground p-6 gap-6">
-      {/* 🔹 LEFT — 그룹 Summary 영역 */}
+      {/* 그룹 Summary 영역 */}
       <aside className="w-1/4 flex flex-col gap-4">
-        <div className="bg-surface-1 border border-border rounded-xl p-4">
-          <h2 className="text-lg font-semibold text-text-1">Group Summary</h2>
-          <p className="text-sm text-text-3 mt-1">• 그룹명: {group.name}</p>
-          <p className="text-sm text-text-3">
-            • 멤버 수: {membersWithProfiles.length}명
-          </p>
-          <p className="text-sm text-text-3">• 내 역할: {membership.role}</p>
-          {discordGuildInfo && (
-            <p className="text-sm text-text-3">
-              • Discord: {discordGuildInfo.name}
-            </p>
-          )}
-        </div>
-
-        <div className="bg-surface-1 border border-border rounded-xl p-4">
-          <h3 className="text-sm font-semibold mb-2 text-text-1">Members</h3>
-          <div className="space-y-2">
-            {membersWithProfiles.map((member) => (
-              <div
-                key={member.userId}
-                className="flex items-center gap-2 text-xs"
-              >
-                {member.avatarUrl && (
-                  <img
-                    src={member.avatarUrl}
-                    alt={member.username}
-                    className="w-6 h-6 rounded-full"
-                  />
-                )}
-                <span className="text-text-1">{member.username}</span>
-                {member.role === "owner" ? (
-                  <span className="text-text-3 text-[10px]">그룹장</span>
-                ) : member.role === "admin" ? (
-                  <span className="text-text-3 text-[10px]">관리자</span>
-                ) : null}
-                <RiotLinkButton />
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="bg-surface-1 border border-border rounded-xl p-4">
-          <h3 className="text-sm font-semibold mb-2 text-text-1">Invite</h3>
-          <p className="text-text-3 text-xs mb-2">
-            그룹 초대 버튼 또는 초대 링크 생성
-          </p>
-          <GroupInviteButton groupId={groupId} groupName={group.name} />
-        </div>
+        <SummarySection
+          group={group}
+          discordGuildInfo={discordGuildInfo}
+          membersWithProfiles={membersWithProfiles}
+        />
+        <MemberSection
+          groupId={groupId}
+          group={group}
+          membersWithProfiles={membersWithProfiles}
+        />
       </aside>
 
-      {/* 🔸 RIGHT — 메인 영역 */}
+      {/* 메인 영역 */}
       <section className="flex-1 flex flex-col gap-6">{children}</section>
     </div>
   );
