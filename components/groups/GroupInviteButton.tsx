@@ -18,7 +18,7 @@ const GroupInviteButton = ({ groupId, groupName }: GroupInviteButtonProps) => {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-1 rounded-full bg-sub3 px-3 py-1.5 text-[11px] font-medium text-gray-200 hover:bg-sub3/80 transition"
+        className="inline-flex items-center gap-1 rounded-full bg-surface-3  px-3 py-1.5 text-[11px] font-medium text-gray-200 hover:bg-surface-3 /80 transition"
       >
         <PiShareFat className="w-3 h-3" />
         <span>초대 링크</span>

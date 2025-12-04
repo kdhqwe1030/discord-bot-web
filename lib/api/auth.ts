@@ -1,4 +1,4 @@
-import { apiClient, ApiResponse } from "./client";
+import api, { ApiResponse } from "./client";
 import type { User } from "@supabase/supabase-js";
 
 interface LoginData {
@@ -21,18 +21,15 @@ export const authAPI = {
   // 로그인
   login: async (loginData: LoginData): Promise<ApiResponse<AuthRes>> => {
     try {
-      const response = await apiClient.post("/api/auth/login", loginData);
-      const result = await response.json();
+      const response = await api.post("/auth/login", loginData);
+      const result = response.data;
 
-      if (!response.ok) {
-        return { error: result.error || "로그인에 실패했습니다." };
-      }
       console.log(result.data);
       return { data: result.data };
-    } catch (error) {
+    } catch (error: any) {
       return {
         error:
-          error instanceof Error ? error.message : "로그인에 실패했습니다.",
+          error.response?.data?.error || error.message || "로그인에 실패했습니다.",
       };
     }
   },
@@ -42,17 +39,14 @@ export const authAPI = {
     registerData: RegisterData
   ): Promise<ApiResponse<AuthRes>> => {
     try {
-      const response = await apiClient.post("/api/auth/register", registerData);
-      const result = await response.json();
-
-      if (!response.ok)
-        return { error: result.error || "회원가입에 실패했습니다." };
+      const response = await api.post("/auth/register", registerData);
+      const result = response.data;
 
       return { data: result.data };
-    } catch (error) {
+    } catch (error: any) {
       return {
         error:
-          error instanceof Error ? error.message : "회원가입에 실패했습니다.",
+          error.response?.data?.error || error.message || "회원가입에 실패했습니다.",
       };
     }
   },
@@ -60,17 +54,14 @@ export const authAPI = {
   // 로그아웃
   logout: async (): Promise<ApiResponse<AuthRes>> => {
     try {
-      const response = await apiClient.post("/api/auth/logout");
-      const result = await response.json();
-
-      if (!response.ok)
-        return { error: result.error || "로그아웃에 실패했습니다." };
+      const response = await api.post("/auth/logout");
+      const result = response.data;
 
       return { data: result.data };
-    } catch (error) {
+    } catch (error: any) {
       return {
         error:
-          error instanceof Error ? error.message : "로그아웃에 실패했습니다.",
+          error.response?.data?.error || error.message || "로그아웃에 실패했습니다.",
       };
     }
   },

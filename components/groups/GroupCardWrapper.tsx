@@ -6,7 +6,7 @@ import { groupAPI } from "@/lib/api/group";
 import { useUserStore } from "@/stores/userStore";
 
 const GroupCardWrapper = () => {
-  const { data: userData } = useUserStore();
+  const { userData } = useUserStore();
   const userId = userData?.user?.id || "";
 
   const {
@@ -34,17 +34,20 @@ const GroupCardWrapper = () => {
         {[...Array(3)].map((_, i) => (
           <div
             key={i}
-            className="w-full bg-sub2 rounded-2xl p-6 shadow-lg shadow-black/40 h-64 animate-pulse"
+            className="w-full bg-surface-1  rounded-2xl p-6 shadow-lg shadow-black/40 h-64 animate-pulse"
           >
-            <div className="h-6 bg-sub3 rounded w-3/4 mb-4"></div>
-            <div className="h-4 bg-sub3 rounded w-1/2 mb-6"></div>
+            <div className="h-6 bg-surface-3  rounded w-3/4 mb-4"></div>
+            <div className="h-4 bg-surface-3  rounded w-1/2 mb-6"></div>
             <div className="flex gap-4 mb-4">
-              <div className="flex-1 h-20 bg-sub3 rounded-xl"></div>
-              <div className="flex-1 h-20 bg-sub3 rounded-xl"></div>
+              <div className="flex-1 h-20 bg-surface-3  rounded-xl"></div>
+              <div className="flex-1 h-20 bg-surface-3  rounded-xl"></div>
             </div>
             <div className="flex -space-x-3">
               {[...Array(4)].map((_, j) => (
-                <div key={j} className="h-8 w-8 bg-sub3 rounded-full"></div>
+                <div
+                  key={j}
+                  className="h-8 w-8 bg-surface-3  rounded-full"
+                ></div>
               ))}
             </div>
           </div>
@@ -57,18 +60,18 @@ const GroupCardWrapper = () => {
   if (isError) {
     return (
       <section className="mx-auto max-w-2xl text-center py-12">
-        <div className="bg-sub2 rounded-2xl p-8 text-white">
+        <div className="bg-surface-1  rounded-2xl p-8 text-text-1 ">
           <h3 className="text-xl font-semibold mb-2">
             그룹 목록을 불러올 수 없습니다
           </h3>
-          <p className="text-gray-400 mb-4">
+          <p className="text-text-3  mb-4">
             {error instanceof Error
               ? error.message
               : "알 수 없는 오류가 발생했습니다."}
           </p>
           <button
             onClick={() => refetch()}
-            className="px-4 py-2 bg-discord text-white rounded-md hover:bg-discord/80 transition"
+            className="px-4 py-2 bg-discord text-text-1  rounded-md hover:bg-discord/80 transition"
           >
             다시 시도
           </button>
