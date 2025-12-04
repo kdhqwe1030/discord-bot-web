@@ -20,6 +20,7 @@ export async function GET(req: NextRequest) {
     provider: "discord",
     options: {
       redirectTo: callbackUrl.toString(),
+      scopes: "identify email guilds guilds.members.read",
     },
   });
 
