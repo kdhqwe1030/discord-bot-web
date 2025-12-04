@@ -96,7 +96,7 @@ const GroupInviteModal = ({
               <button
                 type="button"
                 onClick={handleCopy}
-                className="whitespace-nowrap rounded-md bg-primary px-3 py-2 text-xs font-medium text-text-1  hover:bg-main/80 transition"
+                className="whitespace-nowrap rounded-md bg-primary px-3 py-2 text-xs font-medium text-text-1  hover:bg-primary/80 transition"
               >
                 {copied ? "복사 완료!" : "복사"}
               </button>

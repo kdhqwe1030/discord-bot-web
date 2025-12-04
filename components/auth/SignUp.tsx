@@ -149,7 +149,7 @@ const SignUp = ({ changeMode }: { changeMode: () => void }) => {
       <div className="flex flex-col mb-4">
         <div
           onClick={changeMode}
-          className="flex items-center bg-none border-none cursor-pointer text-foreground/60 text-sm p-1 transition-colors duration-200 hover:text-primaryself-start"
+          className="flex items-center bg-none border-none cursor-pointer text-foreground/60 text-sm p-1 transition-colors duration-200 hover:text-primary self-start"
         >
           <IoArrowBackOutline />
           <span className="font-medium">로그인으로 돌아가기</span>
@@ -176,7 +176,7 @@ const SignUp = ({ changeMode }: { changeMode: () => void }) => {
             className={`w-full p-3 border-2 rounded-md text-sm transition-all duration-200 bg-background text-foreground focus:outline-none placeholder:text-foreground/40 ${
               !validations.email
                 ? "border-red-500 focus:border-red-500 focus:shadow-[0_0_0_3px_rgba(239,68,68,0.1)]"
-                : "border-foreground/20 focus:border-primaryfocus:shadow-[0_0_0_3px] focus:shadow-main/10"
+                : "border-foreground/20 focus:border-primary focus:shadow-[0_0_0_3px] focus:shadow-primary/10"
             }`}
             required
           />
@@ -210,7 +210,7 @@ const SignUp = ({ changeMode }: { changeMode: () => void }) => {
             className={`w-full p-3 border-2 rounded-md text-sm transition-all duration-200 bg-background text-foreground focus:outline-none placeholder:text-foreground/40 ${
               !validations.name
                 ? "border-red-500 focus:border-red-500 focus:shadow-[0_0_0_3px_rgba(239,68,68,0.1)]"
-                : "border-foreground/20 focus:border-primaryfocus:shadow-[0_0_0_3px] focus:shadow-main/10"
+                : "border-foreground/20 focus:border-primary focus:shadow-[0_0_0_3px] focus:shadow-primary/10"
             }`}
             required
           />
@@ -241,7 +241,7 @@ const SignUp = ({ changeMode }: { changeMode: () => void }) => {
             className={`w-full p-3 border-2 rounded-md text-sm transition-all duration-200 bg-background text-foreground focus:outline-none placeholder:text-foreground/40 ${
               !validations.password
                 ? "border-red-500 focus:border-red-500 focus:shadow-[0_0_0_3px_rgba(239,68,68,0.1)]"
-                : "border-foreground/20 focus:border-primaryfocus:shadow-[0_0_0_3px] focus:shadow-main/10"
+                : "border-foreground/20 focus:border-primary focus:shadow-[0_0_0_3px] focus:shadow-primary/10"
             }`}
             required
           />
@@ -274,7 +274,7 @@ const SignUp = ({ changeMode }: { changeMode: () => void }) => {
             className={`w-full p-3 border-2 rounded-md text-sm transition-all duration-200 bg-background text-foreground focus:outline-none placeholder:text-foreground/40 ${
               !validations.passwordCheck
                 ? "border-red-500 focus:border-red-500 focus:shadow-[0_0_0_3px_rgba(239,68,68,0.1)]"
-                : "border-foreground/20 focus:border-primaryfocus:shadow-[0_0_0_3px] focus:shadow-main/10"
+                : "border-foreground/20 focus:border-primary focus:shadow-[0_0_0_3px] focus:shadow-primary/10"
             }`}
             required
           />
@@ -292,7 +292,7 @@ const SignUp = ({ changeMode }: { changeMode: () => void }) => {
         <button
           onClick={handleSubmit}
           disabled={isLoading}
-          className="w-full p-3 bg-primarytext-text-1  border-none rounded-md text-sm font-bold cursor-pointer transition-all duration-200 mt-4 hover:bg-main/80 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full p-3 bg-primary text-text-1  border-none rounded-md text-sm font-bold cursor-pointer transition-all duration-200 mt-4 hover:bg-primary/80 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isLoading ? "가입 중..." : "회원가입"}
         </button>

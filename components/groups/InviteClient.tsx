@@ -94,7 +94,7 @@ const InviteClient = ({ token }: InviteClientProps) => {
       <div className="w-full max-w-md rounded-2xl bg-surface-1  p-6 shadow-lg">
         <h1 className="text-xl font-semibold mb-2">그룹 초대</h1>
         <p className="text-sm text-gray-300 mb-4">
-          <span className="font-semibold text-main">{groupName}</span> 그룹에
+          <span className="font-semibold text-primary">{groupName}</span> 그룹에
           초대되었어요.
         </p>
 
@@ -105,7 +105,7 @@ const InviteClient = ({ token }: InviteClientProps) => {
             </p>
             <button
               onClick={handleGoLogin}
-              className="w-full p-3 bg-primary text-text-1  rounded-md text-sm font-semibold hover:bg-main/80 transition"
+              className="w-full p-3 bg-primary text-text-1  rounded-md text-sm font-semibold hover:bg-primary/80 transition"
             >
               로그인하고 참여하기
             </button>
@@ -118,7 +118,7 @@ const InviteClient = ({ token }: InviteClientProps) => {
             </p>
             <button
               onClick={handleAccept}
-              className="w-full p-3 bg-primary text-text-1  rounded-md text-sm font-semibold hover:bg-main/80 transition"
+              className="w-full p-3 bg-primary text-text-1  rounded-md text-sm font-semibold hover:bg-primary/80 transition"
             >
               그룹 참여하기
             </button>
