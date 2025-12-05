@@ -2,6 +2,7 @@ import ChmpionImg from "./ChmpionImg";
 import { getGameModeName } from "@/utils/gameMode";
 import LineImg from "./LineImg";
 import { Match, MatchPlayer } from "@/types/match";
+import { getTimeAgo } from "@/utils/timeAgo";
 
 const MatchRow = ({ match }: { match: Match }) => {
   const isWin = match.groupWin;
@@ -51,7 +52,13 @@ const MatchRow = ({ match }: { match: Match }) => {
           {resultText}
         </span>
         <span className="text-sm text-text-2">{gameModeName}</span>
-        <span className="text-xs text-text-3">{duration}</span>
+        <div>
+          <span className="text-xs text-text-3">
+            {getTimeAgo(match.startedAt)}
+          </span>
+          {" | "}
+          <span className="text-xs text-text-3">{duration}</span>
+        </div>
       </div>
 
       {/* 플레이어들 */}
