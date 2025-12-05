@@ -1,5 +1,6 @@
 import api, { ApiResponse } from "./client";
 import type { PollWithResults } from "@/types/poll";
+export type MatchType = "all" | "aram" | "custom" | "ranked";
 
 interface AddGroupsType {
   name: string;
@@ -132,12 +133,26 @@ export const groupAPI = {
     }
   },
 
-  //매치 조회
-  fetchMatches: async (groupId: string) => {
-    try {
-      const response = await api.get(`/groups/${groupId}/matches`);
-      console.log("매치 조회", response.data);
+  fetchMatches: async (
+    groupId: string,
+    options?: {
+      type?: MatchType;
+      limit?: number;
+      offset?: number;
+    }
+  ) => {
+    const { type = "all", limit = 20, offset = 0 } = options || {};
 
+    try {
+      const response = await api.get(`/groups/${groupId}/matches`, {
+        params: {
+          type, // all | aram | custom | ranked
+          limit,
+          offset,
+        },
+      });
+
+      console.log("매치 조회", type, response.data);
       return response.data;
     } catch (error: any) {
       throw new Error(
