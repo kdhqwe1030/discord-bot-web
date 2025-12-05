@@ -8,9 +8,8 @@ const NoMatchData = () => {
         전적 데이터가 없습니다
       </h3>
       <p className="text-sm text-text-3 text-center">
-        아직 기록된 게임 전적이 없습니다.
-        <br />
-        게임을 플레이한 후 전적을 갱신해보세요.
+        아직 기록된 게임 전적이 없습니다. 게임을 플레이한 후 전적을
+        갱신해보세요!
       </p>
     </div>
   );
