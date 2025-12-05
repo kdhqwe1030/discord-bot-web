@@ -16,8 +16,7 @@ const MatchesLayout = ({ children }: MatchesLayoutProps) => {
     { name: "전체", path: `/group/${groupId}/matches/all` },
     { name: "자유랭크", path: `/group/${groupId}/matches/ranked` },
     { name: "칼바람", path: `/group/${groupId}/matches/aram` },
-    { name: "아수라장", path: `/group/${groupId}/matches/arena` },
-    { name: "사설", path: `/group/${groupId}/matches/custom` },
+    { name: "사용자설정", path: `/group/${groupId}/matches/custom` },
   ];
 
   return (

@@ -8,7 +8,7 @@ export default function GroupLayout({
   return (
     <div className="min-h-scree">
       <Header />
-      <main className="pt-12 px-4">{children}</main>
+      <main className="pt-4 px-4">{children}</main>
     </div>
   );
 }

@@ -1,8 +1,11 @@
-import { getRankImageUrl } from "@/utils/lolRank";
+"use client";
+import { getRankImageUrl } from "@/utils/lolImg";
 import GroupInviteButton from "../GroupInviteButton";
 import UserProfile from "@/components/users/UserProfile";
 import { FaDiscord } from "react-icons/fa";
 import type { Group, MemberWithProfile } from "@/types/group";
+import { useQuery } from "@tanstack/react-query";
+import { groupAPI } from "@/lib/api/group";
 
 interface MemberSectionProps {
   groupId: string;
@@ -15,6 +18,11 @@ const MemberSection = ({
   group,
   membersWithProfiles,
 }: MemberSectionProps) => {
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["groupMemberCount", group],
+    queryFn: () => groupAPI.fetchMemberMatchCount(group.id),
+  });
+
   return (
     <>
       {/* 멤버 테이블 */}
@@ -37,11 +45,17 @@ const MemberSection = ({
             const rankImg = member.tierFlex
               ? getRankImageUrl({ tierFlex: member.tierFlex })
               : null;
-            const winRate = member.winRate;
+
+            // data.members에서 현재 멤버의 통계 찾기
+            const memberStats = data?.members?.find(
+              (m: any) => m.userId === member.userId
+            );
+            const matchCount = memberStats?.matchCount ?? 0;
+            const winRatePercent = memberStats?.winRatePercent ?? 0;
 
             const winRateColor =
-              typeof winRate === "number"
-                ? winRate >= 50
+              matchCount > 0
+                ? winRatePercent >= 50
                   ? "text-emerald-400"
                   : "text-red-400"
                 : "text-text-2";
@@ -80,14 +94,12 @@ const MemberSection = ({
                   )}
                 </div>
 
-                {/* 매치수 (TODO) */}
-                <div className="text-right text-text-2">
-                  {member.matchCount ?? "-"}
-                </div>
+                {/* 매치수 */}
+                <div className="text-right text-text-2">{matchCount}</div>
 
-                {/* 승률 (TODO) */}
+                {/* 승률 */}
                 <div className={`text-right font-medium ${winRateColor}`}>
-                  {typeof winRate === "number" ? `${winRate}%` : "-"}
+                  {matchCount > 0 ? `${winRatePercent}%` : "-"}
                 </div>
               </div>
             );

@@ -1,6 +1,10 @@
+"use client";
 import { FaDiscord } from "react-icons/fa";
-import { getRankImageUrl } from "@/utils/lolRank";
+import { getRankImageUrl } from "@/utils/lolImg";
 import type { Group, MemberWithProfile } from "@/types/group";
+import SearchButton from "@/components/ui/Buttons/SearchButton";
+import { useQuery } from "@tanstack/react-query";
+import { groupAPI } from "@/lib/api/group";
 
 interface DiscordGuildInfo {
   id: string;
@@ -25,7 +29,19 @@ const SummarySection = ({
     .filter((t): t is string => !!t);
 
   const avgTier = tiers[0] ?? null;
-  const avgTierImg = avgTier ? getRankImageUrl({ tierFlex: avgTier }) : null;
+  const avgTierImg = avgTier
+    ? getRankImageUrl({ tierFlex: avgTier, isMini: false })
+    : null;
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["groupAllCount", group],
+    queryFn: () => groupAPI.fetchMatchCount(group.id),
+  });
+  const winRateColor =
+    typeof data?.winRatePercent === "number"
+      ? data?.winRatePercent >= 50
+        ? "text-emerald-400"
+        : "text-red-400"
+      : "text-text-2";
 
   return (
     <div className="bg-surface-1 border border-border rounded-xl p-4">
@@ -39,7 +55,7 @@ const SummarySection = ({
         )}
       </div>
 
-      <div className="flex gap-4 items-center mt-6">
+      <div className="flex gap-4 items-center mt-6 mb-6">
         <div className="shrink-0 flex items-center justify-center">
           {avgTierImg ? (
             <img
@@ -62,16 +78,29 @@ const SummarySection = ({
           </div>
           <div className="flex justify-between text-[11px] text-text-3">
             <div>
-              <p className="mb-0.5">최근 전체 매치 수</p>
-              <p className="font-medium text-text-2">-</p>
+              <p className="mb-0.5">전체 매치 수</p>
+              {isLoading || isError ? (
+                <p className="font-medium text-text-2 ">-</p>
+              ) : (
+                <p className="font-medium text-text-2 text-xl">
+                  {data?.totalMatches ?? "-"}
+                </p>
+              )}
             </div>
             <div>
-              <p className="mb-0.5">최근 승률</p>
-              <p className="font-medium text-text-2">-</p>
+              <p className="mb-0.5">승률</p>
+              {isLoading || isError ? (
+                <p className="font-medium text-text-2">-</p>
+              ) : (
+                <p className={`font-bold text-xl ${winRateColor}`}>
+                  {data?.winRatePercent ?? "-"}%
+                </p>
+              )}
             </div>
           </div>
         </div>
       </div>
+      <SearchButton groupId={group.id} />
     </div>
   );
 };

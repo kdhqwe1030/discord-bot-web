@@ -23,6 +23,11 @@ const nextConfig: NextConfig = {
         hostname: "raw.communitydragon.org",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "ddragon.leagueoflegends.com",
+        pathname: "/**",
+      },
     ],
     dangerouslyAllowSVG: true,
     contentDispositionType: "attachment",

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import { getRankImageUrl } from "@/utils/lolRank";
+import { getRankImageUrl } from "@/utils/lolImg";
 import { authAPI } from "@/lib/api/auth";
 import RiotLinkButton from "./ui/Buttons/RiotLinkButton";
 import { FaDiscord } from "react-icons/fa";
@@ -47,10 +47,6 @@ export default function Header() {
   const handleLogout = async () => {
     await authAPI.logout(); // 로그아웃 API 호출
     router.refresh();
-  };
-
-  const handleConnectDiscord = () => {
-    router.push("/auth/discord"); // 실제 OAuth 라우트에 맞게 수정
   };
 
   if (!loggedIn) {
