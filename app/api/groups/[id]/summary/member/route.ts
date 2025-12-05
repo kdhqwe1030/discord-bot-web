@@ -48,7 +48,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
       );
     }
 
-    // 3. 그룹의 전체 멤버 목록 (user_id)
+    // 3. 그룹의 전체 멤버 목록
     const { data: groupMembers, error: groupMembersError } = await supabase
       .from("group_members")
       .select("user_id")
@@ -76,7 +76,33 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
       );
     }
 
-    // 5. user_id 기준으로 매치 수 / 승리 수 계산
+    // 5. match_id 기준으로 먼저 그룹핑 (누가 몇 명 들어왔는지 보기 위해)
+    type MatchPlayer = { userId: string; isWin: boolean | null };
+    type MatchAgg = {
+      userIds: Set<string>;
+      players: MatchPlayer[];
+    };
+
+    const matchMap = new Map<string, MatchAgg>();
+
+    for (const row of playerRows ?? []) {
+      const matchId = row.match_id as string;
+      const userId = row.user_id as string;
+      const isWin = row.is_win as boolean | null;
+
+      if (!matchMap.has(matchId)) {
+        matchMap.set(matchId, {
+          userIds: new Set<string>(),
+          players: [],
+        });
+      }
+
+      const agg = matchMap.get(matchId)!;
+      agg.userIds.add(userId);
+      agg.players.push({ userId, isWin });
+    }
+
+    // 6. user_id 기준으로 (2인 이상 매치만) 집계
     type StatAgg = {
       matchIds: Set<string>;
       winMatchIds: Set<string>;
@@ -84,37 +110,37 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
 
     const statsMap = new Map<string, StatAgg>();
 
-    for (const row of playerRows ?? []) {
-      const userId = row.user_id as string;
-      const matchId = row.match_id as string;
-      const isWin = row.is_win as boolean | null;
+    // 2인 이상 참여한 match에 대해서만 사용자별 카운트
+    for (const [matchId, agg] of matchMap) {
+      if (agg.userIds.size < 2) continue; // 2인 미만이면 스킵
 
-      if (!statsMap.has(userId)) {
-        statsMap.set(userId, {
-          matchIds: new Set<string>(),
-          winMatchIds: new Set<string>(),
-        });
-      }
+      for (const p of agg.players) {
+        const userId = p.userId;
+        const isWin = p.isWin;
 
-      const agg = statsMap.get(userId)!;
-      agg.matchIds.add(matchId);
+        if (!statsMap.has(userId)) {
+          statsMap.set(userId, {
+            matchIds: new Set<string>(),
+            winMatchIds: new Set<string>(),
+          });
+        }
 
-      if (isWin) {
-        agg.winMatchIds.add(matchId);
+        const stat = statsMap.get(userId)!;
+        stat.matchIds.add(matchId);
+        if (isWin) {
+          stat.winMatchIds.add(matchId);
+        }
       }
     }
 
-    // 6. 모든 그룹 멤버에 대해 결과 생성 (경기 없으면 0, 0, 0.0%)
+    // 7. 모든 그룹 멤버에 대해 결과 생성
     const membersStats = (groupMembers ?? []).map((m) => {
       const userId = m.user_id as string;
       const agg = statsMap.get(userId);
 
       const matchCount = agg ? agg.matchIds.size : 0;
       const winCount = agg ? agg.winMatchIds.size : 0;
-
       const winRate = matchCount > 0 ? winCount / matchCount : 0;
-
-      // 소수 첫째자리까지 퍼센트 (예: 54.3)
       const winRatePercent =
         matchCount > 0 ? Math.round((winCount / matchCount) * 1000) / 10 : 0;
 
@@ -122,8 +148,8 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
         userId,
         matchCount,
         winCount,
-        winRate, // 0 ~ 1
-        winRatePercent, // 예: 54.3
+        winRate,
+        winRatePercent,
       };
     });
 

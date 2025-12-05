@@ -45,53 +45,66 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
       );
     }
 
-    // 1. 전체 매치 수 (match_id 기준 중복 제거)
-    const { data: groupMatches, error: groupMatchesError } = await supabase
-      .from("group_matches")
-      .select("match_id")
+    // 1. 이 그룹의 모든 플레이 데이터 조회
+    const { data: playerRows, error: playerError } = await supabase
+      .from("group_match_players")
+      .select("match_id, user_id, is_win")
       .eq("group_id", groupId);
 
-    if (groupMatchesError) {
-      console.error("❌ group_matches 조회 에러:", groupMatchesError);
+    if (playerError) {
+      console.error("❌ group_match_players 조회 에러:", playerError);
       return NextResponse.json(
         { error: "그룹 매치 조회 중 오류가 발생했습니다." },
         { status: 500 }
       );
     }
 
-    const totalMatchSet = new Set(groupMatches?.map((m) => m.match_id));
-    const totalMatches = totalMatchSet.size;
+    type MatchAgg = {
+      userIds: Set<string>;
+      hasWin: boolean; // 그룹원 중 한 명이라도 is_win=true ?
+    };
 
-    // 2. 승리한 매치 수 (group_match_players에서 is_win = true, match_id 중복 제거)
-    const { data: winRows, error: winError } = await supabase
-      .from("group_match_players")
-      .select("match_id")
-      .eq("group_id", groupId)
-      .eq("is_win", true);
+    const matchMap = new Map<string, MatchAgg>();
 
-    if (winError) {
-      console.error("❌ group_match_players 조회 에러:", winError);
-      return NextResponse.json(
-        { error: "그룹 승리 매치 조회 중 오류가 발생했습니다." },
-        { status: 500 }
-      );
+    for (const row of playerRows ?? []) {
+      const matchId = row.match_id as string;
+      const userId = row.user_id as string;
+      const isWin = row.is_win as boolean | null;
+
+      if (!matchMap.has(matchId)) {
+        matchMap.set(matchId, {
+          userIds: new Set<string>(),
+          hasWin: false,
+        });
+      }
+
+      const agg = matchMap.get(matchId)!;
+      agg.userIds.add(userId);
+      if (isWin) agg.hasWin = true;
     }
 
-    const winMatchSet = new Set(winRows?.map((r) => r.match_id));
-    const winCount = winMatchSet.size;
+    // 2. "그룹원 2명 이상 참여한 매치"만 집계
+    let totalMatches = 0;
+    let winCount = 0;
 
-    // 3. 승률 계산 (소수 첫째 자리까지)
+    for (const [_matchId, agg] of matchMap) {
+      if (agg.userIds.size >= 2) {
+        totalMatches++;
+        if (agg.hasWin) {
+          winCount++;
+        }
+      }
+    }
+
     const winRate = totalMatches > 0 ? winCount / totalMatches : 0;
     const winRatePercent =
-      totalMatches > 0
-        ? Math.round((winCount / totalMatches) * 1000) / 10 // ex) 54.3
-        : 0;
+      totalMatches > 0 ? Math.round((winCount / totalMatches) * 1000) / 10 : 0;
 
     return NextResponse.json(
       {
         totalMatches,
         winCount,
-        winRatePercent, // 54.3
+        winRatePercent,
       },
       { status: 200 }
     );
