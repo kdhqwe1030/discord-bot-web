@@ -114,18 +114,43 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
       );
     }
 
-    // 3. 쿼리 파라미터로 페이지네이션 (기본: 최근 20개)
+    // 3. 쿼리 파라미터 (limit / offset / type)
     const { searchParams } = new URL(req.url);
     const limit = Number(searchParams.get("limit") ?? "20");
     const offset = Number(searchParams.get("offset") ?? "0");
+    const typeParam = (searchParams.get("type") ?? "all") as
+      | "all"
+      | "aram"
+      | "custom"
+      | "ranked";
 
-    // 4. group_matches에서 이 그룹의 매치들 조회
-    const { data: matchRows, error: matchesError } = await supabase
+    // 4. group_matches 기본 쿼리 + type별 queue_id 필터
+    let matchQuery = supabase
       .from("group_matches")
       .select(
         "id, match_id, queue_id, duration_seconds, started_at, winner_team_id"
       )
-      .eq("group_id", groupId)
+      .eq("group_id", groupId);
+
+    switch (typeParam) {
+      case "aram":
+        // 칼바람
+        matchQuery = matchQuery.eq("queue_id", 450);
+        break;
+      case "custom":
+        // 사설
+        matchQuery = matchQuery.eq("queue_id", 0);
+        break;
+      case "ranked":
+        // 솔랭 + 자유랭 (필요에 따라 수정)
+        matchQuery = matchQuery.in("queue_id", [420, 440]);
+        break;
+      case "all":
+      default:
+      // 필터 없음
+    }
+
+    const { data: matchRows, error: matchesError } = await matchQuery
       .order("started_at", { ascending: false })
       .range(offset, offset + limit - 1);
 
@@ -138,13 +163,18 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
     }
 
     const matches = matchRows ?? [];
+    const hasMore = matches.length === limit; // Supabase에서 limit만큼 꽉 채워서 왔으면 다음 페이지 있음
+
     if (matches.length === 0) {
-      return NextResponse.json({ matches: [] }, { status: 200 });
+      return NextResponse.json(
+        { matches: [], hasMore: false },
+        { status: 200 }
+      );
     }
 
     const matchIds = matches.map((m) => m.match_id);
 
-    // 5. 각 매치의 그룹 멤버 전적(group_match_players) 조회
+    // 5. 각 매치의 그룹 멤버 전적 조회
     const { data: playerRows, error: playersError } = await supabase
       .from("group_match_players")
       .select(
@@ -185,7 +215,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
 
     const players = playerRows ?? [];
 
-    // 6. 소환사 이름 붙이기 위해 lol_accounts 조회 (선택)
+    // 6. 소환사 이름 붙이기 위해 lol_accounts 조회
     const userIds = Array.from(new Set(players.map((p) => p.user_id)));
     let accountMap = new Map<
       string,
@@ -245,7 +275,6 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
           };
         });
 
-      // 이 매치에서 "그룹이 이겼는지" 간단 정의: 그룹 멤버 중 승리한 사람 있으면 true
       const groupWin = matchPlayers.some((p) => p.isWin === true);
 
       return {
@@ -259,12 +288,16 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
         players: matchPlayers,
       };
     });
+
+    // 2인 이상 참가한 매치만 필터링
     const filteredMatchList = matchList.filter(
       (match) => match.players.length >= 2
     );
+
     return NextResponse.json(
       {
         matches: filteredMatchList,
+        hasMore, // ✅ 여기 추가
       },
       { status: 200 }
     );
