@@ -49,7 +49,9 @@ export const groupAPI = {
     } catch (error: any) {
       return {
         error:
-          error.response?.data?.error || error.message || "그룹 목록 조회에 실패했습니다.",
+          error.response?.data?.error ||
+          error.message ||
+          "그룹 목록 조회에 실패했습니다.",
       };
     }
   },
@@ -66,7 +68,9 @@ export const groupAPI = {
     } catch (error: any) {
       return {
         error:
-          error.response?.data?.error || error.message || "그룹 추가에 실패했습니다.",
+          error.response?.data?.error ||
+          error.message ||
+          "그룹 추가에 실패했습니다.",
       };
     }
   },
@@ -81,7 +85,9 @@ export const groupAPI = {
     } catch (error: any) {
       return {
         error:
-          error.response?.data?.error || error.message || "Discord 서버 목록 조회에 실패했습니다.",
+          error.response?.data?.error ||
+          error.message ||
+          "Discord 서버 목록 조회에 실패했습니다.",
       };
     }
   },
@@ -92,7 +98,9 @@ export const groupAPI = {
       const res = await api.post(`/groups/${groupId}/invites`);
       return res.data as { inviteUrl: string; invitation: any };
     } catch (error: any) {
-      throw new Error(error.response?.data?.error || "초대 링크 생성에 실패했습니다.");
+      throw new Error(
+        error.response?.data?.error || "초대 링크 생성에 실패했습니다."
+      );
     }
   },
 
@@ -107,7 +115,30 @@ export const groupAPI = {
       );
       return response.data;
     } catch (error: any) {
-      throw new Error(error.response?.data?.error || "투표 목록 조회에 실패했습니다.");
+      throw new Error(
+        error.response?.data?.error || "투표 목록 조회에 실패했습니다."
+      );
+    }
+  },
+
+  recordUpdate: async (groupId: string) => {
+    try {
+      const response = await api.post(`/groups/${groupId}/matches`);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(
+        error.response?.data?.error || "매치 아이디 조회에 실패했습니다."
+      );
+    }
+  },
+  fetchMatches: async (groupId: string) => {
+    try {
+      const response = await api.get(`/groups/${groupId}/matches`);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(
+        error.response?.data?.error || "그룹 매치 목록 조회에 실패했습니다."
+      );
     }
   },
 };
