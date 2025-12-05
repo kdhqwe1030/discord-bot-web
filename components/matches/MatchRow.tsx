@@ -39,7 +39,6 @@ const MatchRow = ({ match }: { match: Match }) => {
     ),
   ];
 
-  console.log(filterList);
   return (
     <div
       className={`w-full mb-3 rounded-xl overflow-hidden shadow-sm flex ${railColor}`}

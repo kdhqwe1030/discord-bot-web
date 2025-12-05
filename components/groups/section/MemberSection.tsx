@@ -22,9 +22,7 @@ const MemberSection = ({
     queryKey: ["groupMemberCount", group],
     queryFn: () => groupAPI.fetchMemberMatchCount(group.id),
   });
-  console.log("멤버", data);
-  console.log("멤버", data);
-  console.log("멤버", data);
+
   return (
     <>
       {/* 멤버 테이블 */}
