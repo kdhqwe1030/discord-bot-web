@@ -120,7 +120,7 @@ export const groupAPI = {
       );
     }
   },
-
+  // 전적 갱신
   recordUpdate: async (groupId: string) => {
     try {
       const response = await api.post(`/groups/${groupId}/matches`);
@@ -131,13 +131,31 @@ export const groupAPI = {
       );
     }
   },
+
+  //매치 조회
   fetchMatches: async (groupId: string) => {
     try {
       const response = await api.get(`/groups/${groupId}/matches`);
+      console.log("매치 조회", response.data);
+
       return response.data;
     } catch (error: any) {
       throw new Error(
         error.response?.data?.error || "그룹 매치 목록 조회에 실패했습니다."
+      );
+    }
+  },
+
+  //그룹 전체 승률 매치 수 조회
+  fetchMatchCount: async (groupId: string) => {
+    try {
+      const response = await api.get(`/groups/${groupId}/summary`);
+      console.log("그룹 전체 승률 매치 수 조회", response.data);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(
+        error.response?.data?.error ||
+          "그룹 전체 승률, 매치 수 조회에 실패했습니다."
       );
     }
   },
