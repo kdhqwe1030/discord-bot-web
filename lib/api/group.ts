@@ -159,4 +159,17 @@ export const groupAPI = {
       );
     }
   },
+
+  fetchMemberMatchCount: async (groupId: string) => {
+    try {
+      const response = await api.get(`/groups/${groupId}/summary/member`);
+      console.log("그룹 전체 승률 매치 수 조회", response.data);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(
+        error.response?.data?.error ||
+          "그룹 전체 승률, 매치 수 조회에 실패했습니다."
+      );
+    }
+  },
 };
