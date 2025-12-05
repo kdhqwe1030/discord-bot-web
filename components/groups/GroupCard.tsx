@@ -1,6 +1,8 @@
 "use client";
 
 import UserProfile from "@/components/users/UserProfile";
+import { groupAPI } from "@/lib/api/group";
+import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { FaDiscord } from "react-icons/fa";
 
@@ -29,14 +31,31 @@ const GroupCard = ({
   members,
 }: GroupCardProps) => {
   const router = useRouter();
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["groupAllCount", id],
+    queryFn: () => groupAPI.fetchMatchCount(id),
+  });
+  const winRateColor =
+    typeof data?.winRatePercent === "number"
+      ? data?.winRatePercent >= 50
+        ? "text-emerald-400"
+        : "text-red-400"
+      : "text-text-2";
   return (
     <div
       className="w-full bg-surface-1  rounded-2xl p-6 shadow-lg shadow-black/40 text-text-1  h-64 hover:border-discord border-2 border-transparent transition-all cursor-pointer"
-      onClick={() => router.push(`/group/${id}`)}
+      onClick={() => router.push(`/group/${id}/matches/all`)}
     >
       <div className="flex items-start justify-between">
         <div className="space-y-1">
-          <h2 className="text-xl font-semibold leading-tight">{name}</h2>
+          <div className="flex gap-4 items-center text-center">
+            <h2 className="text-xl font-semibold leading-tight">{name}</h2>
+            {userRole === "owner" && (
+              <span className="mt-2 text-md font-semibold text-discord capitalize">
+                {userRole}
+              </span>
+            )}
+          </div>
           {linkedGuildId && (
             <div className="flex items-center gap-2 text-sm text-gray-300">
               <FaDiscord className="text-discord" />
@@ -53,21 +72,30 @@ const GroupCard = ({
 
       <div className="mt-5 flex gap-4">
         <div className="flex-1 rounded-xl bg-surface-3  px-4 py-3 flex flex-col justify-between">
-          <span className="text-[11px] uppercase tracking-[0.12em] text-text-3 ">
-            Role
+          <span className="text-sm uppercase tracking-[0.12em] text-text-3 ">
+            매치수
           </span>
-          <span className="mt-2 text-lg font-semibold text-discord capitalize">
-            {userRole}
-          </span>
+
+          {isLoading || isError ? (
+            <p className="font-medium text-text-2 ">-</p>
+          ) : (
+            <p className="font-medium text-text-2 text-xl">
+              {data?.totalMatches ?? "-"}
+            </p>
+          )}
         </div>
 
         <div className="flex-1 rounded-xl bg-surface-3  px-4 py-3 flex flex-col justify-between">
-          <span className="text-[11px] uppercase tracking-[0.12em] text-text-3 ">
-            Status
+          <span className="text-sm uppercase tracking-[0.12em] text-text-3 ">
+            승률
           </span>
-          <span className="mt-2 text-lg font-semibold text-success ">
-            Active
-          </span>
+          {isLoading || isError ? (
+            <></>
+          ) : (
+            <span className={`mt-2 text-lg font-semibold ${winRateColor}`}>
+              {data?.winRatePercent ?? "-"}%
+            </span>
+          )}
         </div>
       </div>
 
