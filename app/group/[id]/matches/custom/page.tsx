@@ -1,3 +1,5 @@
+import MatchWrapper from "@/components/matches/MatchWrapper";
+
 interface CustomMatchesPageProps {
   params: Promise<{ id: string }>;
 }
@@ -8,7 +10,7 @@ const CustomMatchesPage = async ({ params }: CustomMatchesPageProps) => {
   return (
     <div>
       <h2 className="text-xl font-semibold text-text-1 mb-4">사설</h2>
-      <p className="text-text-3">그룹 {groupId}의 사설 게임 매치 기록이 여기에 표시됩니다.</p>
+      <MatchWrapper groupId={groupId} type="custom" />
     </div>
   );
 };
