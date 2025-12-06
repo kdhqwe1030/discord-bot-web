@@ -66,11 +66,9 @@ export default function Header() {
   return (
     <header className="w-full h-16 flex items-center justify-between px-4 border-b border-border bg-background text-foreground">
       {/* 좌측 로고/타이틀 */}
-      <div className="flex items-center gap-2">
-        <span className="font-semibold text-lg ">이름뭘로하지</span>
-        <span className="text-xs text-text-3 ml-2">
-          어쩌구 저쩌구 그룹 전적 분석
-        </span>
+      <div className="flex items-center gap-2 ml-2">
+        <span className="font-semibold text-xl ">5inq</span>
+        <span className="text-xs text-text-3 ml-2">그룹 전적 분석</span>
       </div>
 
       {/* 우측 프로필 영역 */}
