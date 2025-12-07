@@ -39,12 +39,12 @@ const TeamAnalysisHeader = ({ matchData, groupTeamId }: TeamStatsProps) => {
     totalGold > 0 ? (leftStats.totalGold / totalGold) * 100 : 50;
 
   // 왼쪽 팀(우리 그룹)이 이겼으면 파랑, 졌으면 빨강
-  const leftColorClass = leftTeam.win ? "bg-blue-500" : "bg-red-500";
-  const leftTextColor = leftTeam.win ? "text-blue-400" : "text-red-400";
+  const leftColorClass = leftTeam.win ? "bg-win" : "bg-lose";
+  const leftTextColor = leftTeam.win ? "text-win/80" : "text-lose/80";
 
   // 오른쪽 팀(상대)은 그 반대
-  const rightColorClass = leftTeam.win ? "bg-red-500" : "bg-blue-500";
-  const rightTextColor = leftTeam.win ? "text-red-400" : "text-blue-400";
+  const rightColorClass = leftTeam.win ? "bg-lose" : "bg-win";
+  const rightTextColor = leftTeam.win ? "text-lose/80" : "text-win/80";
 
   return (
     <div className="w-full rounded-lg p-4 mb-2 text-text-1 flex items-center justify-between shadow-md">

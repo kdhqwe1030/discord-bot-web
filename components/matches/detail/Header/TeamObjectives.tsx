@@ -19,14 +19,14 @@ const TeamObjectives = ({
     { key: "riftHerald", label: "Herald" }, //전령
     { key: "tower", label: "Tower" }, //타워
   ];
-  const textColor = win ? "text-blue-500" : "text-red-500";
+  const textColor = win ? "text-win/80" : "text-lose/80";
   return (
     <div
       className={`${
         side === "right" ? "flex-row-reverse text-right" : "flex-row text-left"
       }`}
     >
-      <span className={`${textColor} text-sm`}>
+      <span className={`${textColor} text-sm font-semibold`}>
         {win ? "승리팀" : "패배팀"}
       </span>
       <div

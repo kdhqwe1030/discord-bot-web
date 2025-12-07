@@ -147,7 +147,7 @@ const MatchDetailRow = ({
           </span>
           <div className="flex-1 h-2 bg-slate-800 rounded-full overflow-hidden">
             <div
-              className="h-full bg-red-500"
+              className="h-full bg-lose"
               style={{ width: `${damageDealtRatio}%` }}
             />
           </div>
