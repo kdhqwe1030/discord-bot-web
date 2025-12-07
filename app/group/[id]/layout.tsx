@@ -124,23 +124,26 @@ const GroupLayout = async ({ children, params }: GroupLayoutProps) => {
   }
 
   return (
-    <div className="min-h-screen flex bg-background text-foreground p-6 gap-6">
+    <div className="min-h-screen flex bg-background text-foreground ">
       {/* 그룹 Summary 영역 */}
-      <aside className="w-1/4 flex flex-col gap-4">
-        <SummarySection
-          group={group}
-          discordGuildInfo={discordGuildInfo}
-          membersWithProfiles={membersWithProfiles}
-        />
-        <MemberSection
-          groupId={groupId}
-          group={group}
-          membersWithProfiles={membersWithProfiles}
-        />
-      </aside>
-
-      {/* 메인 영역 */}
-      <section className="flex-1 flex flex-col gap-6">{children}</section>
+      <div className="w-full px-4 py-6 flex flex-row gap-6 lg:max-w-6xl lg:mx-auto">
+        <aside className="max-w-1/4 min-w-1/4 flex flex-col gap-4">
+          <SummarySection
+            group={group}
+            discordGuildInfo={discordGuildInfo}
+            membersWithProfiles={membersWithProfiles}
+          />
+          <MemberSection
+            groupId={groupId}
+            group={group}
+            membersWithProfiles={membersWithProfiles}
+          />
+        </aside>
+        {/* 메인 영역 */}
+        <section className="max-w-3/4 min-w-3/4 flex flex-col gap-6 ">
+          {children}
+        </section>
+      </div>
     </div>
   );
 };

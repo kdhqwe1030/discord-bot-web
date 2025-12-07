@@ -63,12 +63,12 @@ const MatchDetailRow = ({
   console.log(primaryPerkId, getPerkImgUrl(primaryPerkId));
   return (
     <div
-      className={`flex items-center gap-3 p-2 rounded-md border-l-4 ${
+      className={`grid grid-cols-[2.5fr_0.8fr_1.8fr_1fr_0.6fr_2fr] gap-1 p-2 rounded-md border-l-4 ${
         isWinner ? "border-win" : "border-lose"
       }`}
     >
-      {/* 1. 챔피언 + 스펠 + 이름 : 고정폭 */}
-      <div className="flex items-center gap-2 w-64 shrink-0">
+      {/* 1. 챔피언 + 스펠 + 이름 */}
+      <div className="flex items-center gap-2">
         <ChmpionImg
           championName={player.championName}
           size={8}
@@ -111,8 +111,8 @@ const MatchDetailRow = ({
           />
         </div>
         {/* 이름 + 챔피언 */}
-        <div className="flex flex-col">
-          <span className="text-sm font-bold text-text-2">
+        <div className="flex flex-col shrink-0">
+          <span className="text-xs font-bold text-text-2">
             {player.riotIdGameName || "Unknown"}
             <span className="text-xs text-text-4 font-normal">
               {" "}
@@ -123,8 +123,8 @@ const MatchDetailRow = ({
         </div>
       </div>
 
-      {/* 2. KDA + 킬관여 : 고정폭 */}
-      <div className="w-32 text-sm flex flex-col items-center shrink-0">
+      {/* 2. KDA + 킬관여 */}
+      <div className="text-sm flex flex-col items-center ">
         <span>
           {player.kills} / {player.deaths} / {player.assists}
         </span>
@@ -138,8 +138,8 @@ const MatchDetailRow = ({
         </div>
       </div>
 
-      {/* 3. 가한 피해 / 받은 피해 : 바 + 숫자 (폭 고정) */}
-      <div className="w-56 text-xs flex flex-col gap-1 shrink-0">
+      {/* 3. 가한 피해 / 받은 피해 */}
+      <div className="text-xs flex flex-col gap-1 ">
         {/* 가한 피해 */}
         <div className="flex items-center gap-2">
           <span className="w-14 text-right">
@@ -159,15 +159,15 @@ const MatchDetailRow = ({
           </span>
           <div className="flex-1 h-2 bg-slate-800 rounded-full overflow-hidden">
             <div
-              className="h-full bg-blue-500"
+              className="h-full bg-win"
               style={{ width: `${damageTakenRatio}%` }}
             />
           </div>
         </div>
       </div>
 
-      {/*  4. 성장 지표 (CS & 골드) */}
-      <div className="w-20 text-xs flex flex-col items-center justify-center text-text-3">
+      {/* 4. 성장 지표 (CS & 골드) */}
+      <div className="text-xs flex flex-col items-center justify-center text-text-3 ">
         <span title={`분당 ${csPerMin}`}>
           CS {totalCS} ({csPerMin})
         </span>
@@ -175,28 +175,28 @@ const MatchDetailRow = ({
       </div>
 
       {/* 5. 시야 관련 : 와드 / 점수 */}
-      <div className="w-28 text-xs flex flex-col items-center shrink-0">
+      <div className="text-xs flex flex-col items-center justify-center">
         <span>
-          {player.wardsPlaced}/{player.detectorWardsPlaced}
+          {player.wardsPlaced} / {player.detectorWardsPlaced}
         </span>
-        <span>{player.visionScore}</span>
+        <span>점수: {player.visionScore}</span>
       </div>
 
-      {/* 6. 아이템 : 항상 같은 자리 */}
-      <div className="flex gap-1 flex-wrap ml-auto w-64">
+      {/* 6. 아이템 */}
+      <div className="flex gap-1 flex-wrap items-center">
         {items.map((itemId, idx) => {
           const src = getItemImageUrl(itemId);
           return (
             <div
               key={idx}
-              className="w-7 h-7 bg-slate-900/70 rounded-sm overflow-hidden flex items-center justify-center"
+              className="w-5 h-5 bg-slate-900/70 rounded-sm overflow-hidden flex items-center justify-center"
             >
               {src ? (
                 <Image
                   src={src}
                   alt={`item-${idx}`}
-                  width={28}
-                  height={28}
+                  width={20}
+                  height={20}
                   className="object-cover"
                 />
               ) : (
