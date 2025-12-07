@@ -52,7 +52,10 @@ export default function Header() {
   if (!loggedIn) {
     return (
       <header className="w-full h-14 flex items-center justify-between px-4 border-b border-border bg-background text-foreground">
-        <div className="font-semibold text-lg">My LoL Group</div>
+        <div className="flex items-center gap-2 ml-2">
+          <span className="font-semibold text-xl ">5inq</span>
+          <span className="text-xs text-text-3 ml-2">그룹 전적 분석</span>
+        </div>
         <button
           onClick={() => router.push("/login")}
           className="px-3 py-1.5 rounded-md bg-primary text-sm text-white hover:bg-primary/90"
