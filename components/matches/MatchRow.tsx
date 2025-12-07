@@ -60,7 +60,7 @@ const MatchRow = ({ match }: { match: Match }) => {
       >
         {/* 왼쪽 정보 레일 */}
         <div
-          className={`flex flex-col justify-center gap-1 px-4 py-3 w-32 border-r border-divider ${railColor}`}
+          className={`flex flex-col justify-center gap-1 px-4 py-3 w-32 ${railColor}`}
         >
           <span className="text-md font-semibold tracking-wide">
             {resultText}
@@ -70,7 +70,7 @@ const MatchRow = ({ match }: { match: Match }) => {
             <span className="text-xs text-text-3">
               {getTimeAgo(match.startedAt)}
             </span>
-            {" | "}
+            <span className="text-xs text-text-3">{" | "}</span>
             <span className="text-xs text-text-3">{duration}</span>
           </div>
         </div>
@@ -122,6 +122,7 @@ const MatchRow = ({ match }: { match: Match }) => {
           matchData={data.matchData}
           winnerTeamId={match.winnerTeamId}
           groupWin={match.groupWin}
+          matchDuration={match.durationSeconds}
         />
       )}
     </>
