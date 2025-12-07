@@ -1,8 +1,14 @@
+"use client";
 import ChmpionImg from "./ChmpionImg";
 import { getGameModeName } from "@/utils/gameMode";
 import LineImg from "./LineImg";
 import { Match, MatchPlayer } from "@/types/match";
 import { getTimeAgo } from "@/utils/timeAgo";
+import MatchDetail from "./detail/MatchDetail";
+import { useQuery } from "@tanstack/react-query";
+import { groupAPI } from "@/lib/api/group";
+import { useState } from "react";
+import { IoIosArrowDown } from "react-icons/io";
 
 const MatchRow = ({ match }: { match: Match }) => {
   const isWin = match.groupWin;
@@ -11,7 +17,7 @@ const MatchRow = ({ match }: { match: Match }) => {
     : "bg-lose/20 text-lose border-l-lose";
 
   const resultText = isWin ? "승리" : "패배";
-
+  const [isClick, setIsClick] = useState(false);
   // 시간 포맷
   const minutes = Math.floor(match.durationSeconds / 60);
   const seconds = match.durationSeconds % 60;
@@ -40,59 +46,86 @@ const MatchRow = ({ match }: { match: Match }) => {
     ),
   ];
 
+  const { data, isLoading } = useQuery({
+    queryKey: ["matches", match.matchId],
+    queryFn: () => groupAPI.fetchMatchDetail(match.matchId),
+  });
+
+  console.log(data);
   return (
-    <div
-      className={`w-full mb-3 rounded-xl overflow-hidden shadow-sm flex ${railColor}`}
-    >
-      {/* 왼쪽 정보 레일 */}
+    <>
       <div
-        className={`flex flex-col justify-center gap-1 px-4 py-3 w-32 border-r border-divider ${railColor}`}
+        className={`w-full mb-3 rounded-xl overflow-hidden shadow-sm flex ${railColor} justify-between`}
+        onClick={() => setIsClick(!isClick)}
       >
-        <span className="text-md font-semibold tracking-wide">
-          {resultText}
-        </span>
-        <span className="text-sm text-text-2">{gameModeName}</span>
-        <div>
-          <span className="text-xs text-text-3">
-            {getTimeAgo(match.startedAt)}
+        {/* 왼쪽 정보 레일 */}
+        <div
+          className={`flex flex-col justify-center gap-1 px-4 py-3 w-32 ${railColor}`}
+        >
+          <span className="text-md font-semibold tracking-wide">
+            {resultText}
           </span>
-          {" | "}
-          <span className="text-xs text-text-3">{duration}</span>
+          <span className="text-sm text-text-2">{gameModeName}</span>
+          <div>
+            <span className="text-xs text-text-3">
+              {getTimeAgo(match.startedAt)}
+            </span>
+            <span className="text-xs text-text-3">{" | "}</span>
+            <span className="text-xs text-text-3">{duration}</span>
+          </div>
+        </div>
+
+        {/* 플레이어들 */}
+        <div className="flex-1 flex items-center gap-6 px-6 py-3 overflow-x-auto">
+          {filterList.map((player: MatchPlayer, index: number) => {
+            const rawKda = player.deaths
+              ? (player.kills + player.assists) / player.deaths
+              : "Perfect";
+            const kda = typeof rawKda === "number" ? rawKda.toFixed(2) : rawKda;
+
+            return (
+              <div
+                key={index}
+                className="flex flex-col items-center gap-1 w-32"
+              >
+                <ChmpionImg championName={player.championName} />
+
+                {/* 소환사 이름 */}
+                <div className="flex items-center gap-1 mt-1">
+                  <LineImg line={player.position} />
+                  <span className="text-sm text-text-2 truncate max-x-32">
+                    {player.summonerName}
+                  </span>
+                </div>
+
+                {/* KDA */}
+                <div className="text-sm text-text-3">
+                  {player.kills}/{player.deaths}/{player.assists}{" "}
+                  <span className="ml-1 text-xs text-text-4">
+                    {kda === "Perfect" ? "PERFECT" : `${kda}`}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        <div
+          className={`flex items-center px-8 ${
+            isClick ? "rotate-180" : "rotate-0"
+          } transition-all duration-300`}
+        >
+          <IoIosArrowDown className="text-4xl text-text-1" />
         </div>
       </div>
-
-      {/* 플레이어들 */}
-      <div className="flex-1 flex items-center gap-6 px-6 py-3 overflow-x-auto">
-        {filterList.map((player: MatchPlayer, index: number) => {
-          const rawKda = player.deaths
-            ? (player.kills + player.assists) / player.deaths
-            : "Perfect";
-          const kda = typeof rawKda === "number" ? rawKda.toFixed(2) : rawKda;
-
-          return (
-            <div key={index} className="flex flex-col items-center gap-1 w-32">
-              <ChmpionImg championName={player.championName} />
-
-              {/* 소환사 이름 */}
-              <div className="flex items-center gap-1 mt-1">
-                <LineImg line={player.position} />
-                <span className="text-sm text-text-2 truncate max-x-32">
-                  {player.summonerName}
-                </span>
-              </div>
-
-              {/* KDA */}
-              <div className="text-sm text-text-3">
-                {player.kills}/{player.deaths}/{player.assists}{" "}
-                <span className="ml-1 text-xs text-text-4">
-                  {kda === "Perfect" ? "PERFECT" : `${kda}`}
-                </span>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
+      {isClick && !isLoading && data?.matchData && (
+        <MatchDetail
+          matchData={data.matchData}
+          winnerTeamId={match.winnerTeamId}
+          groupWin={match.groupWin}
+          matchDuration={match.durationSeconds}
+        />
+      )}
+    </>
   );
 };
 
