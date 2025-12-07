@@ -42,15 +42,17 @@ const SummarySection = ({
         ? "text-emerald-400"
         : "text-red-400"
       : "text-text-2";
-
+  console.log(membersWithProfiles);
+  console.log(membersWithProfiles);
+  console.log(membersWithProfiles);
   return (
     <div className="bg-surface-1 border border-border rounded-xl p-4">
       <div className="flex justify-between items-end">
         <h1 className="text-2xl font-semibold text-text-1">{group.name}</h1>
         {discordGuildInfo && (
-          <div className="flex items-center gap-2 text-sm text-gray-300">
+          <div className="flex items-center gap-1 text-sm text-gray-300">
             <FaDiscord className="text-discord" />
-            <span>{discordGuildInfo.name}</span>
+            <span className="text-text-2">{discordGuildInfo.name}</span>
           </div>
         )}
       </div>
@@ -61,7 +63,7 @@ const SummarySection = ({
             <img
               src={avgTierImg}
               alt={avgTier}
-              className="w-16 h-16 md:w-20 md:h-20 object-contain"
+              className="w-12 h-12 lg:w-18 lg:h-18 object-contain"
             />
           ) : (
             <div className="w-16 h-16 md:w-20 md:h-20 rounded-full border border-dashed border-border flex items-center justify-center text-[11px] text-text-3">
