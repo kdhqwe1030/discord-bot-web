@@ -138,7 +138,7 @@ export const groupAPI = {
   // 전적 갱신
   recordUpdate: async (groupId: string) => {
     try {
-      const response = await api.post(`/groups/${groupId}/matches`);
+      const response = await api.post(`/groups/${groupId}/record-update`);
       return response.data;
     } catch (error: any) {
       throw new Error(
