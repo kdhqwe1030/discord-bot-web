@@ -11,15 +11,6 @@ export interface SyncResult {
   syncedPlayers: number;
 }
 
-interface SyncMatchesForMemberArgs {
-  supabase: SupabaseClient;
-  groupId: string;
-  userId: string;
-  puuid: string;
-  groupPuuids: string[];
-  puuidToUserId: Map<string, string>;
-}
-
 type GroupMemberRow = {
   user_id: string;
 };
@@ -100,75 +91,76 @@ export async function syncGroupMatches(
     groupPuuids.push(m.puuid);
   }
 
-  let totalSyncedMatches = 0;
-  let totalSyncedPlayers = 0;
-
-  // 3. 멤버별로 최근 전적 동기화
-  for (const m of membersWithLol) {
-    const { syncedMatches, syncedPlayers } = await syncMatchesForMember({
-      supabase,
-      groupId,
-      userId: m.userId,
-      puuid: m.puuid,
-      groupPuuids,
-      puuidToUserId,
-    });
-
-    totalSyncedMatches += syncedMatches;
-    totalSyncedPlayers += syncedPlayers;
-  }
-
-  return {
-    syncedMatches: totalSyncedMatches,
-    syncedPlayers: totalSyncedPlayers,
-  };
-}
-
-async function syncMatchesForMember({
-  supabase,
-  groupId,
-  userId,
-  puuid,
-  groupPuuids,
-  puuidToUserId,
-}: SyncMatchesForMemberArgs): Promise<SyncResult> {
-  // 1) 이 멤버의 last_synced 정보 가져오기
-  const { data: syncState, error: syncError } = await supabase
+  const { data: syncStates, error: syncStateError } = await supabase
     .from("group_match_sync_state")
-    .select("*")
+    .select("user_id, last_synced_match_time")
     .eq("group_id", groupId)
-    .eq("user_id", userId)
-    .maybeSingle();
+    .in(
+      "user_id",
+      membersWithLol.map((m) => m.userId)
+    );
 
-  if (syncError) {
-    console.error("❌ sync_state 조회 에러:", syncError);
+  if (syncStateError) {
+    console.error("❌ sync_state 조회 에러:", syncStateError);
     throw new Error("동기화 상태 조회 실패");
   }
 
-  const lastSyncedTime = syncState?.last_synced_match_time as number | null;
+  const userIdToLastSynced = new Map<string, number | null>();
+  const userIdToLatestMatchStart = new Map<string, number>();
 
-  // 2) 라이엇 API에서 matchId 리스트 가져오기
-  const matchIds = await fetchRecentMatchIds(puuid, lastSyncedTime);
+  for (const m of membersWithLol) {
+    const state = syncStates?.find((s) => s.user_id === m.userId);
+    const last = (state?.last_synced_match_time as number | null) ?? null;
+    userIdToLastSynced.set(m.userId, last);
+    // 초기 latest는 lastSynced 기준
+    if (last !== null) {
+      userIdToLatestMatchStart.set(m.userId, last);
+    }
+  }
 
-  if (matchIds.length === 0) {
-    // 업데이트 할 매치가 없음 → 시간만 갱신
-    await upsertSyncState(
-      supabase,
-      groupId,
-      userId,
-      puuid,
-      lastSyncedTime ?? 0
-    );
+  // 4. 멤버별로 "새로 나온 matchIds"를 모아서 Set으로 dedupe
+  const uniqueMatchIds = new Set<RiotMatchId>();
+
+  for (const m of membersWithLol) {
+    const lastSyncedTime = userIdToLastSynced.get(m.userId);
+    const ids = await fetchRecentMatchIds(m.puuid, lastSyncedTime);
+
+    for (const id of ids) {
+      uniqueMatchIds.add(id);
+    }
+  }
+
+  if (uniqueMatchIds.size === 0) {
+    // 그래도 sync_state는 최소 한 번 찍어두고 싶다면 여기서 루프 돌면서 upsert 가능
+    for (const m of membersWithLol) {
+      const last = userIdToLastSynced.get(m.userId) ?? 0;
+      await upsertSyncState(supabase, groupId, m.userId, m.puuid, last);
+    }
     return { syncedMatches: 0, syncedPlayers: 0 };
   }
 
-  let latestMatchStartTime = lastSyncedTime ?? 0;
-  let syncedMatches = 0;
-  let syncedPlayers = 0;
+  // 5. 고유 matchId들에 대해서만 상세 조회 + DB upsert
+  let totalSyncedMatches = 0;
+  let totalSyncedPlayers = 0;
+  for (const matchId of uniqueMatchIds) {
+    let match: any;
 
-  for (const matchId of matchIds) {
-    const match = await fetchMatchDetail(matchId);
+    try {
+      match = await fetchMatchDetail(matchId);
+    } catch (e: any) {
+      if (
+        e?.message === "RIOT_RATE_LIMIT" ||
+        (e as any).code === "RIOT_RATE_LIMIT"
+      ) {
+        console.warn(
+          "⚠️ Riot 레이트 리밋에 도달했습니다. 남은 매치는 스킵합니다."
+        );
+        break;
+      }
 
+      console.error("❌ 개별 매치 상세 조회 에러, 이 매치만 스킵:", e);
+      continue;
+    }
     const info = match.info;
     const metadata = match.metadata;
 
@@ -176,11 +168,6 @@ async function syncMatchesForMember({
     const queueId = info.queueId as number;
     const durationSeconds = info.gameDuration as number;
 
-    if (startedAtMs > latestMatchStartTime) {
-      latestMatchStartTime = startedAtMs;
-    }
-
-    // 3) group_matches upsert (매치 한 번만)
     const startedAtIso = new Date(startedAtMs).toISOString();
     const winnerTeamId = getWinnerTeamId(info);
 
@@ -202,20 +189,17 @@ async function syncMatchesForMember({
 
     if (upsertMatchError) {
       console.error("❌ group_matches upsert 에러:", upsertMatchError);
-      continue; // 이 매치는 스킵
+      continue; // 이 매치는 전체 스킵
     }
 
-    syncedMatches += 1;
+    totalSyncedMatches += 1;
 
-    // 4) group_match_players upsert (이 매치에서 "그룹 멤버"만)
     const participants = info.participants as any[];
 
     for (const p of participants) {
       const pPuuid = p.puuid as string;
-      if (!groupPuuids.includes(pPuuid)) continue;
-
       const groupUserId = puuidToUserId.get(pPuuid);
-      if (!groupUserId) continue;
+      if (!groupUserId) continue; // 그룹 멤버가 아니면 스킵
 
       const totalCs =
         (p.totalMinionsKilled as number) + (p.neutralMinionsKilled as number);
@@ -255,16 +239,32 @@ async function syncMatchesForMember({
         continue;
       }
 
-      syncedPlayers += 1;
+      totalSyncedPlayers += 1;
+
+      // 이 match의 시작 시간이 해당 유저에게 새로운 latest라면 갱신
+      const prevLatest =
+        userIdToLatestMatchStart.get(groupUserId) ??
+        userIdToLastSynced.get(groupUserId) ??
+        0;
+
+      if (startedAtMs > prevLatest) {
+        userIdToLatestMatchStart.set(groupUserId, startedAtMs);
+      }
     }
   }
 
-  // 5) sync_state 갱신
-  await upsertSyncState(supabase, groupId, userId, puuid, latestMatchStartTime);
+  // 6. 멤버별 sync_state 갱신 (한번에)
+  for (const m of membersWithLol) {
+    const prev = userIdToLastSynced.get(m.userId) ?? 0;
+    const latest = userIdToLatestMatchStart.get(m.userId) ?? prev;
+    await upsertSyncState(supabase, groupId, m.userId, m.puuid, latest);
+  }
 
-  return { syncedMatches, syncedPlayers };
+  return {
+    syncedMatches: totalSyncedMatches,
+    syncedPlayers: totalSyncedPlayers,
+  };
 }
-
 // ---- Riot API 호출 유틸 ----
 
 async function fetchRecentMatchIds(
@@ -308,8 +308,16 @@ async function fetchMatchDetail(matchId: string): Promise<any> {
   });
 
   if (!res.ok) {
-    console.error("❌ Riot match detail fetch 실패:", await res.text());
-    throw new Error("라이엇 매치 상세 조회 실패");
+    const body = await res.text();
+    console.error("❌ Riot match detail fetch 실패:", body);
+
+    if (res.status === 429) {
+      const err = new Error("RIOT_RATE_LIMIT");
+      (err as any).code = "RIOT_RATE_LIMIT";
+      throw err;
+    }
+
+    throw new Error("RIOT_MATCH_DETAIL_FAIL");
   }
 
   return res.json();

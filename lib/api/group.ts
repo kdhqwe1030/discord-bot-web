@@ -138,7 +138,7 @@ export const groupAPI = {
   // 전적 갱신
   recordUpdate: async (groupId: string) => {
     try {
-      const response = await api.post(`/groups/${groupId}/matches`);
+      const response = await api.post(`/groups/${groupId}/record-update`);
       return response.data;
     } catch (error: any) {
       throw new Error(
@@ -211,6 +211,19 @@ export const groupAPI = {
     } catch (error: any) {
       throw new Error(
         error.response?.data?.error || "매치 상세 정보 조회에 실패했습니다."
+      );
+    }
+  },
+  fetchLastSyncedAt: async (groupId: string) => {
+    try {
+      const response = await api.get(
+        `/groups/${groupId}/record-update/last-synced`
+      );
+      console.log(response.data);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(
+        error.response?.data?.error || "마지막 전적 갱신 정보 불러오기 실패"
       );
     }
   },
