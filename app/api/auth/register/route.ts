@@ -11,24 +11,36 @@ export async function POST(req: Request) {
     );
   }
 
-  const { data, error } = await supabase.auth.signUp({
+  const { data: signUp, error: signUpError } = await supabase.auth.signUp({
     email,
     password,
     options: {
-      data: { username },
       emailRedirectTo: process.env.NEXT_PUBLIC_URL,
+      data: { username }, // metadata에도 저장
     },
   });
 
-  if (error) {
-    console.error("❌ 회원가입 오류 발생", error);
-    return NextResponse.json({ error: error.message }, { status: 400 });
+  if (signUpError || !signUp.user) {
+    console.error("❌ 회원가입 오류 발생", signUpError);
+    return NextResponse.json(
+      { error: signUpError?.message || "가입 실패" },
+      { status: 400 }
+    );
+  }
+
+  // 2️. user_profiles에 바로 Insert
+  const { error: profileError } = await supabase.from("user_profiles").insert({
+    user_id: signUp.user.id,
+    username,
+  });
+
+  if (profileError) {
+    console.error("❌ 프로필 생성 오류", profileError);
+    return NextResponse.json({ error: "프로필 생성 실패" }, { status: 500 });
   }
 
   return NextResponse.json({
-    data: {
-      message: "회원가입 성공",
-      user: data.user,
-    },
+    message: "회원가입 완료",
+    user: signUp.user,
   });
 }
