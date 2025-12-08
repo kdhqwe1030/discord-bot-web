@@ -13,7 +13,7 @@ interface SideBarProps {
 
 const SideBar = ({ group, groupId }: SideBarProps) => {
   const { data, isLoading } = useQuery({
-    queryKey: ["group", groupId],
+    queryKey: ["groupSideBar", groupId],
     queryFn: () => groupAPI.fetchGroup(groupId),
   });
 

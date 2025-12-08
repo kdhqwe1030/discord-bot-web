@@ -2,7 +2,7 @@
 import { FaDiscord } from "react-icons/fa";
 import { getRankImageUrl } from "@/utils/lolImg";
 import type { Group, MemberWithProfile } from "@/types/group";
-import SearchButton from "@/components/ui/Buttons/SearchButton";
+import RecordUpdateButton from "@/components/ui/Buttons/RecordUpdateButton";
 import { useQuery } from "@tanstack/react-query";
 import { groupAPI } from "@/lib/api/group";
 
@@ -103,7 +103,7 @@ const SummarySection = ({
           </div>
         </div>
       </div>
-      <SearchButton groupId={group.id} />
+      <RecordUpdateButton groupId={group.id} />
     </div>
   );
 };

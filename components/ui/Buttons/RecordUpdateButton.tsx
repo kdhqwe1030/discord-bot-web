@@ -1,9 +1,10 @@
 "use client";
 
 import { groupAPI } from "@/lib/api/group";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-const SearchButton = ({ groupId }: { groupId: string }) => {
+const RecordUpdateButton = ({ groupId }: { groupId: string }) => {
+  const queryClient = useQueryClient();
   const { mutate, isPending } = useMutation({
     mutationFn: () => groupAPI.recordUpdate(groupId),
     onSuccess: (data) => {
@@ -13,6 +14,11 @@ const SearchButton = ({ groupId }: { groupId: string }) => {
     onError: (error) => {
       console.error("매치 검색 실패:", error);
       alert("전적 갱신 실패");
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["groupMemberCount", "groupSideBar", "matches"],
+      });
     },
   });
 
@@ -33,4 +39,4 @@ const SearchButton = ({ groupId }: { groupId: string }) => {
   );
 };
 
-export default SearchButton;
+export default RecordUpdateButton;
