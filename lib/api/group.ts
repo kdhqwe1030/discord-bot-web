@@ -214,4 +214,17 @@ export const groupAPI = {
       );
     }
   },
+  fetchLastSyncedAt: async (groupId: string) => {
+    try {
+      const response = await api.get(
+        `/groups/${groupId}/record-update/last-synced`
+      );
+      console.log(response.data);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(
+        error.response?.data?.error || "마지막 전적 갱신 정보 불러오기 실패"
+      );
+    }
+  },
 };
