@@ -2,6 +2,7 @@
 
 import { groupAPI } from "@/lib/api/group";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 
 const RecordUpdateButton = ({ groupId }: { groupId: string }) => {
   const queryClient = useQueryClient();
@@ -16,9 +17,10 @@ const RecordUpdateButton = ({ groupId }: { groupId: string }) => {
       alert("전적 갱신 실패");
     },
     onSettled: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["groupMemberCount", "groupSideBar", "matches"],
-      });
+      queryClient.invalidateQueries({ queryKey: ["groupAllCount"] });
+      queryClient.invalidateQueries({ queryKey: ["groupMemberCount"] });
+      queryClient.invalidateQueries({ queryKey: ["groupSideBar"] });
+      queryClient.invalidateQueries({ queryKey: ["matches"] });
     },
   });
 
