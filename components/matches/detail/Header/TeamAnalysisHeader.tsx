@@ -47,7 +47,7 @@ const TeamAnalysisHeader = ({ matchData, groupTeamId }: TeamStatsProps) => {
   const rightTextColor = leftTeam.win ? "text-lose/80" : "text-win/80";
 
   return (
-    <div className="w-full rounded-lg p-4 mb-2 text-text-1 flex items-center justify-between shadow-md">
+    <div className="w-full rounded-lg px-4 py-1 mb-2 text-text-1 flex items-center justify-between">
       {/* 왼쪽 팀 오브젝트 */}
       <TeamObjectives team={leftTeam} side="left" win={leftTeam.win} />
 

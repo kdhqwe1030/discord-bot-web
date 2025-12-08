@@ -55,12 +55,12 @@ const MatchRow = ({ match }: { match: Match }) => {
   return (
     <>
       <div
-        className={`w-full mb-3 rounded-xl overflow-hidden shadow-sm flex ${railColor} justify-between`}
+        className={`mb-3 rounded-xl overflow-hidden shadow-sm flex ${railColor} justify-between`}
         onClick={() => setIsClick(!isClick)}
       >
         {/* 왼쪽 정보 레일 */}
         <div
-          className={`flex flex-col justify-center gap-1 px-4 py-3 w-32 ${railColor}`}
+          className={`flex flex-col justify-center gap-1 px-4 py-3 w-28 ${railColor}`}
         >
           <span className="text-md font-semibold tracking-wide">
             {resultText}
@@ -86,14 +86,14 @@ const MatchRow = ({ match }: { match: Match }) => {
             return (
               <div
                 key={index}
-                className="flex flex-col items-center gap-1 w-32"
+                className="flex flex-col items-center gap-1 lg:w-24"
               >
                 <ChmpionImg championName={player.championName} />
 
                 {/* 소환사 이름 */}
                 <div className="flex items-center gap-1 mt-1">
                   <LineImg line={player.position} />
-                  <span className="text-sm text-text-2 truncate max-x-32">
+                  <span className="text-sm text-text-2 truncate max-x-24">
                     {player.summonerName}
                   </span>
                 </div>
@@ -110,11 +110,11 @@ const MatchRow = ({ match }: { match: Match }) => {
           })}
         </div>
         <div
-          className={`flex items-center px-8 ${
+          className={`flex items-center px-4 ${
             isClick ? "rotate-180" : "rotate-0"
           } transition-all duration-300`}
         >
-          <IoIosArrowDown className="text-4xl text-text-1" />
+          <IoIosArrowDown className="text-2xl text-text-1" />
         </div>
       </div>
       {isClick && !isLoading && data?.matchData && (
