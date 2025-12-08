@@ -38,10 +38,12 @@ const SummarySection = ({
   });
   const winRateColor =
     typeof data?.winRatePercent === "number"
-      ? data?.winRatePercent >= 50
-        ? "text-emerald-400"
-        : "text-red-400"
-      : "text-text-2";
+      ? data?.totalMatches !== 0
+        ? data?.winRatePercent >= 50
+          ? "text-emerald-400" //승률이 50이상인 경우
+          : "text-red-400" //승률이 50 미만인 경우
+        : "text-text-2" //매치가 0번인 경우
+      : "text-text-2"; //defalut
 
   return (
     <div className="bg-surface-1 border border-border rounded-xl p-4">
@@ -88,12 +90,13 @@ const SummarySection = ({
               )}
             </div>
             <div>
-              <p className="mb-0.5">승률</p>
+              <p className="mb-0.5 ">승률</p>
               {isLoading || isError ? (
                 <p className="font-medium text-text-2">-</p>
               ) : (
                 <p className={`font-bold text-xl ${winRateColor}`}>
-                  {data?.winRatePercent ?? "-"}%
+                  {data?.totalMatches !== 0 ? data?.winRatePercent ?? "-" : "-"}
+                  {data?.totalMatches !== 0 ? "%" : ""}
                 </p>
               )}
             </div>
