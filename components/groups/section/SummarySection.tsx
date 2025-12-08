@@ -42,9 +42,7 @@ const SummarySection = ({
         ? "text-emerald-400"
         : "text-red-400"
       : "text-text-2";
-  console.log(membersWithProfiles);
-  console.log(membersWithProfiles);
-  console.log(membersWithProfiles);
+
   return (
     <div className="bg-surface-1 border border-border rounded-xl p-4">
       <div className="flex justify-between items-end">

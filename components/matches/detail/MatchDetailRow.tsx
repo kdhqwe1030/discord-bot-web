@@ -60,7 +60,6 @@ const MatchDetailRow = ({
     player.item5,
     player.item6,
   ];
-  console.log(primaryPerkId, getPerkImgUrl(primaryPerkId));
   return (
     <div
       className={`grid grid-cols-[2.5fr_0.8fr_1.8fr_1fr_0.6fr_2fr] gap-1 p-2 rounded-md border-l-4 ${
