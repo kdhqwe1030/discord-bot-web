@@ -76,6 +76,20 @@ export const groupAPI = {
     }
   },
 
+  //그룹 사이드 바 정보 호출 api
+  fetchGroup: async (groupId: string) => {
+    try {
+      const response = await api.get(`/groups/${groupId}`);
+      console.log("그룹 요약 및 멤버 정보", response.data);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(
+        error.response?.data?.error ||
+          "그룹 요약 및 멤버 정보 조회에 실패했습니다."
+      );
+    }
+  },
+
   // Discord 서버 목록 조회
   fetchDiscordGuilds: async (): Promise<ApiResponse<DiscordGuild[]>> => {
     try {
@@ -133,6 +147,7 @@ export const groupAPI = {
     }
   },
 
+  //매치 조회
   fetchMatches: async (
     groupId: string,
     options?: {
@@ -174,7 +189,7 @@ export const groupAPI = {
       );
     }
   },
-
+  //그룹 전체 승률 및 멤버 정보 요약
   fetchMemberMatchCount: async (groupId: string) => {
     try {
       const response = await api.get(`/groups/${groupId}/summary/member`);
@@ -187,6 +202,7 @@ export const groupAPI = {
       );
     }
   },
+  //매치 상세 정보 호출
   fetchMatchDetail: async (matchId: string) => {
     try {
       const response = await api.get(`/match/${matchId}`);
@@ -194,8 +210,7 @@ export const groupAPI = {
       return response.data;
     } catch (error: any) {
       throw new Error(
-        error.response?.data?.error ||
-          "그룹 전체 승률, 매치 수 조회에 실패했습니다."
+        error.response?.data?.error || "매치 상세 정보 조회에 실패했습니다."
       );
     }
   },
