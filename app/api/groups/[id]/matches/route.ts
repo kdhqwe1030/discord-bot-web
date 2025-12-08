@@ -7,6 +7,7 @@ interface RouteParams {
   params: Promise<{ id: string }>;
 }
 
+//전적 갱신
 export async function POST(req: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params;
@@ -297,7 +298,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
     return NextResponse.json(
       {
         matches: filteredMatchList,
-        hasMore, // ✅ 여기 추가
+        hasMore,
       },
       { status: 200 }
     );
