@@ -60,7 +60,7 @@ const MatchRow = ({ match }: { match: Match }) => {
       >
         {/* 왼쪽 정보 레일 */}
         <div
-          className={`flex flex-col justify-center gap-1 px-4 py-3 w-32 ${railColor}`}
+          className={`flex flex-col justify-center gap-1 px-4 py-3 w-28 ${railColor}`}
         >
           <span className="text-md font-semibold tracking-wide">
             {resultText}
