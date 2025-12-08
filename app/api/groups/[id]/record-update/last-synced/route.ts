@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { RouteParams } from "../route";
 import { createClient } from "@/lib/supabase/supabaseServer";
-
+interface RouteParams {
+  params: Promise<{ id: string }>;
+}
 export async function GET(req: NextRequest, { params }: RouteParams) {
   const { id } = await params;
   const groupId = id;
