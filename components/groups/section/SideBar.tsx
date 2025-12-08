@@ -31,7 +31,7 @@ const SideBar = ({ group, groupId }: SideBarProps) => {
   };
 
   return (
-    <aside className="max-w-1/4 min-w-1/4 flex flex-col gap-4">
+    <aside className="w-1/4 flex flex-col gap-4">
       <SummarySection
         group={group}
         discordGuildInfo={discordGuildInfo}

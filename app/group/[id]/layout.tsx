@@ -51,16 +51,13 @@ const GroupLayout = async ({ children, params }: GroupLayoutProps) => {
     );
   }
 
-
   return (
     <div className="min-h-screen flex bg-background text-foreground ">
       {/* 그룹 Summary 영역 */}
       <div className="w-full px-4 py-6 flex flex-row gap-6 lg:max-w-6xl lg:mx-auto">
         <SideBar group={group} groupId={groupId} />
         {/* 메인 영역 */}
-        <section className="max-w-3/4 min-w-3/4 flex flex-col gap-6 ">
-          {children}
-        </section>
+        <section className="w-3/4 flex flex-col gap-6 ">{children}</section>
       </div>
     </div>
   );
