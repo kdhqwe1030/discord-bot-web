@@ -54,7 +54,7 @@ const MatchDetailRow = ({
   ];
   return (
     <div
-      className={`grid grid-cols-[2.5fr_0.8fr_1.8fr_1fr_0.6fr_2fr] gap-1 p-2 rounded-md border-l-4 ${
+      className={`grid grid-cols-[2.5fr_1fr_1.8fr_1fr_0.6fr_2fr] gap-1 p-2 rounded-md border-l-4 ${
         isWinner ? "border-win" : "border-lose"
       }`}
     >

@@ -7,7 +7,7 @@ const MatchDetailHeader = ({
 }) => {
   return (
     <div
-      className={`grid grid-cols-[2.5fr_0.8fr_1.8fr_1fr_0.6fr_2fr] gap-3 p-2 rounded-md ${
+      className={`grid grid-cols-[2.5fr_1fr_1.8fr_1fr_0.6fr_2fr] gap-3 p-2 rounded-md ${
         isWinner ? "bg-win/20 text-win" : "bg-lose/20 text-lose"
       } font-bold text-sm mb-1 mt-3`}
     >
