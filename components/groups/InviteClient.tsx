@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { userAPI } from "@/lib/api/user";
+import { useNotificationStore } from "@/stores/notificationStore";
 
 interface Invitation {
   group_id: string;
@@ -22,7 +23,9 @@ const InviteClient = ({ token }: InviteClientProps) => {
   const [invitation, setInvitation] = useState<Invitation | null>(null);
   const [invLoading, setInvLoading] = useState(true);
   const [error, setError] = useState("");
-
+  const showNotification = useNotificationStore(
+    (state) => state.showNotification
+  );
   // 초대 정보 가져오기
   useEffect(() => {
     const fetchInvite = async () => {
@@ -49,7 +52,9 @@ const InviteClient = ({ token }: InviteClientProps) => {
     const result = await userAPI.acceptInvite(token);
 
     if (result.error) {
-      alert(result.error);
+      showNotification(result.error, {
+        severity: "error",
+      });
       return;
     }
     if (result.data?.groupId) {

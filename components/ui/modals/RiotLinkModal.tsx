@@ -1,5 +1,6 @@
 import Modal from "@/components/Modal";
 import { userAPI } from "@/lib/api/user";
+import { useNotificationStore } from "@/stores/notificationStore";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
@@ -14,7 +15,9 @@ const RiotLinkModal = ({
   const [tagLine, setTagLine] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
   const queryClient = useQueryClient();
-
+  const showNotification = useNotificationStore(
+    (state) => state.showNotification
+  );
   const linkRiotMutation = useMutation({
     mutationFn: (payload: { gameName: string; tagLine: string }) =>
       userAPI.addRiotAccount(payload.gameName, payload.tagLine),
@@ -27,7 +30,9 @@ const RiotLinkModal = ({
 
       queryClient.invalidateQueries({ queryKey: ["me"] });
       onCloseModal();
-      alert("라이엇 계정이 연동되었습니다.");
+      showNotification("라이엇 계정 연결 완료", {
+        severity: "success",
+      });
     },
     onError: (error: any) => {
       setErrorMsg(error?.message ?? "라이엇 계정 연결에 실패했습니다.");

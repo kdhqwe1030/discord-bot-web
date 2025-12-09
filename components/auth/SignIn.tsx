@@ -5,6 +5,7 @@ import { ChangeEvent, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FaDiscord } from "react-icons/fa";
 import { authAPI } from "@/lib/api/auth";
+import { useNotificationStore } from "@/stores/notificationStore";
 
 const SignIn = ({ changeMode }: { changeMode: () => void }) => {
   const router = useRouter();
@@ -18,7 +19,9 @@ const SignIn = ({ changeMode }: { changeMode: () => void }) => {
     password: "",
   });
   const [isLoading, setIsLoading] = useState(false);
-
+  const showNotification = useNotificationStore(
+    (state) => state.showNotification
+  );
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
     setLoginForm((prev) => ({
@@ -39,7 +42,8 @@ const SignIn = ({ changeMode }: { changeMode: () => void }) => {
 
     if (error) {
       console.error("로그인 실패", error);
-      alert(error);
+
+      showNotification(error, { severity: "error" });
       setIsLoading(false);
       return;
     }
