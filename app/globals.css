@@ -2,104 +2,57 @@
 
 :root {
   /* Base Colors */
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0f172a;
+  --foreground: #e2e8f0;
 
-  /* Surface Layers */
-  --surface-1: #ffffff; /* 카드 */
-  --surface-2: #f9fafb; /* 배경 레이어 */
-  --surface-3: #f3f4f6; /* 더 어두운 배경 */
+  --surface-1: #1e293b;
+  --surface-2: #0f172a;
+  --surface-3: #334155;
 
-  /* Primary Colors */
   --primary: #7c3aed;
   --primary-light: #a78bfa;
   --primary-dark: #6d28d9;
 
   /* Border & Divider */
-  --border: #e5e7eb;
-  --divider: #e5e7eb;
+  --border: #334155;
+  --divider: #334155;
 
   /* Functional Colors */
-  --success: #16a34a;
-  --success-bg: #dcfce7;
-  --error: #dc2626;
-  --error-bg: #fee2e2;
-  --warning: #ea580c;
-  --warning-bg: #ffedd5;
+  --success: #22c55e;
+  --success-bg: #065f46;
+  --error: #ef4444;
+  --error-bg: #7f1d1d;
+  --warning: #fb923c;
+  --warning-bg: #7c2d12;
 
   /* Text Hierarchy */
-  --text-1: #171717;
-  --text-2: #374151;
-  --text-3: #6b7280;
-  --text-4: #9ca3af;
+  --text-1: #ededed;
+  --text-2: #cbd5e1;
+  --text-3: #94a3b8;
+  --text-4: #64748b;
 
   /* Riot Win/Lose */
-  --win: #2563eb;
-  --win-dark: #1e3a8a;
-  --lose: #dc2626;
+  --win: #3b82f6;
+  --win-dark: #1e40af;
+  --lose: #f87171;
   --lose-dark: #7f1d1d;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    /* Base Colors */
-    --background: #0f172a;
-    --foreground: #e2e8f0;
-
-    --surface-1: #1e293b;
-    --surface-2: #0f172a;
-    --surface-3: #334155;
-
-    --primary: #7c3aed;
-    --primary-light: #a78bfa;
-    --primary-dark: #6d28d9;
-
-    /* Border & Divider */
-    --border: #334155;
-    --divider: #334155;
-
-    /* Functional Colors */
-    --success: #22c55e;
-    --success-bg: #065f46;
-    --error: #ef4444;
-    --error-bg: #7f1d1d;
-    --warning: #fb923c;
-    --warning-bg: #7c2d12;
-
-    /* Text Hierarchy */
-    --text-1: #ededed;
-    --text-2: #cbd5e1;
-    --text-3: #94a3b8;
-    --text-4: #64748b;
-
-    /* Riot Win/Lose */
-    --win: #3b82f6;
-    --win-dark: #1e40af;
-    --lose: #f87171;
-    --lose-dark: #7f1d1d;
-  }
-}
-
 @theme inline {
-  /* Base */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
 
-  /* Surface */
   --color-surface-1: var(--surface-1);
   --color-surface-2: var(--surface-2);
   --color-surface-3: var(--surface-3);
 
-  /* Primary */
   --color-primary: var(--primary);
   --color-primary-light: var(--primary-light);
   --color-primary-dark: var(--primary-dark);
 
-  /* Border */
   --color-border: var(--border);
   --color-divider: var(--divider);
 
-  /* Functional */
   --color-success: var(--success);
   --color-success-bg: var(--success-bg);
   --color-error: var(--error);
@@ -107,22 +60,20 @@
   --color-warning: var(--warning);
   --color-warning-bg: var(--warning-bg);
 
-  /* Text */
   --color-text-1: var(--text-1);
   --color-text-2: var(--text-2);
   --color-text-3: var(--text-3);
   --color-text-4: var(--text-4);
 
-  /* Win/Lose */
   --color-win: var(--win);
   --color-win-dark: var(--win-dark);
   --color-lose: var(--lose);
   --color-lose-dark: var(--lose-dark);
 
-  /* Discord */
   --color-discord: #5865f2;
   --color-riot: #d13639;
   --color-riot-dark: #c22d2b;
+
   /* Fonts */
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
