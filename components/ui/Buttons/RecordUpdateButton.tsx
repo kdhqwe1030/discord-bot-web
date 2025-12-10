@@ -1,6 +1,7 @@
 "use client";
 
 import { groupAPI } from "@/lib/api/group";
+import { useNotificationStore } from "@/stores/notificationStore";
 import { getTimeAgo } from "@/utils/timeAgo";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
@@ -8,16 +9,20 @@ import { useEffect, useState } from "react";
 const COOLDOWN_MS = 5 * 60 * 1000; // 5분
 
 const RecordUpdateButton = ({ groupId }: { groupId: string }) => {
+  const showNotification = useNotificationStore(
+    (state) => state.showNotification
+  );
   const queryClient = useQueryClient();
   const { mutate, isPending } = useMutation({
     mutationFn: () => groupAPI.recordUpdate(groupId),
     onSuccess: (data) => {
       console.log("매치 검색 성공:", data);
-      alert("전적 갱신 완료");
+
+      showNotification("전적 갱신 성공", { severity: "success" });
     },
     onError: (error) => {
       console.error("매치 검색 실패:", error);
-      alert("전적 갱신 실패");
+      showNotification("전적 갱신 실패", { severity: "error" });
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["groupAllCount"] });

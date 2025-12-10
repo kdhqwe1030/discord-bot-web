@@ -7,6 +7,7 @@ import {
 import ChmpionImg from "../ChmpionImg";
 import Image from "next/image";
 import { Participant } from "./type";
+import { kdaColor } from "@/utils/kdhColor";
 
 const MatchDetailRow = ({
   player,
@@ -28,15 +29,6 @@ const MatchDetailRow = ({
     ? (player.kills + player.assists) / player.deaths
     : "Perfect";
   const kda = typeof rawKda === "number" ? rawKda.toFixed(2) : rawKda;
-
-  const kdaColor = () => {
-    if (kda === "Perfect") return "text-yellow-400";
-    const numKda = Number(kda);
-    if (numKda >= 5) return "text-purple-500";
-    if (numKda >= 3) return "text-green-400";
-    if (numKda >= 1) return "text-gray-200";
-    return "text-text-4";
-  };
 
   const killPart = player.challenges?.killParticipation;
   const killPartPercent =
@@ -62,7 +54,7 @@ const MatchDetailRow = ({
   ];
   return (
     <div
-      className={`grid grid-cols-[2.5fr_0.8fr_1.8fr_1fr_0.6fr_2fr] gap-1 p-2 rounded-md border-l-4 ${
+      className={`grid grid-cols-[2.5fr_1fr_1.8fr_1fr_0.6fr_2fr] gap-1 p-2 rounded-md border-l-4 ${
         isWinner ? "border-win" : "border-lose"
       }`}
     >
@@ -131,7 +123,7 @@ const MatchDetailRow = ({
           {killPartPercent !== null && (
             <span className="text-text-4">{`(${killPartPercent}%)`}</span>
           )}
-          <span className={`ml-1 ${kdaColor()}`}>
+          <span className={`ml-1 ${kdaColor(kda)}`}>
             {kda === "Perfect" ? "PERFECT" : kda}
           </span>
         </div>

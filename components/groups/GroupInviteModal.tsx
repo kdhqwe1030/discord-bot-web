@@ -5,6 +5,7 @@ import { useState } from "react";
 import Modal from "../Modal";
 import { groupAPI } from "@/lib/api/group";
 import { useMutation } from "@tanstack/react-query";
+import { useNotificationStore } from "@/stores/notificationStore";
 
 interface GroupInviteModalProps {
   isOpen: boolean;
@@ -23,6 +24,9 @@ const GroupInviteModal = ({
   const [errorMsg, setErrorMsg] = useState("");
   const [copied, setCopied] = useState(false);
 
+  const showNotification = useNotificationStore(
+    (state) => state.showNotification
+  );
   const createInviteMutation = useMutation({
     mutationFn: () => groupAPI.createInvite(groupId),
     onSuccess: (data) => {
@@ -47,9 +51,14 @@ const GroupInviteModal = ({
     try {
       await navigator.clipboard.writeText(inviteUrl);
       setCopied(true);
+      showNotification("복사 완료", {
+        severity: "success",
+      });
     } catch {
       setCopied(false);
-      alert("클립보드 복사에 실패했습니다. 직접 복사해주세요.");
+      showNotification("클립보드 복사에 실패했습니다. 직접 복사해주세요.", {
+        severity: "error",
+      });
     }
   };
   console.log("📌 invite modal groupId =", groupId);

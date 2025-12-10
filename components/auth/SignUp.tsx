@@ -1,8 +1,12 @@
 import { ChangeEvent, useState } from "react";
 import { IoArrowBackOutline } from "react-icons/io5";
 import { authAPI } from "@/lib/api/auth";
+import { useNotificationStore } from "@/stores/notificationStore";
 
 const SignUp = ({ changeMode }: { changeMode: () => void }) => {
+  const showNotification = useNotificationStore(
+    (state) => state.showNotification
+  );
   // 유효성 검사 상태
   const [validations, setValidations] = useState({
     email: true,
@@ -55,13 +59,14 @@ const SignUp = ({ changeMode }: { changeMode: () => void }) => {
 
       if (error) {
         console.error("회원가입 실패", error);
-        alert(error);
+        showNotification("회원가입 실패", { severity: "error" });
         setIsLoading(false);
         return;
       }
 
       console.log("회원가입 성공", data);
-      alert("회원가입이 완료되었습니다! 이메일 인증 후 로그인해주세요.");
+      showNotification("회원가입 성공", { severity: "success" });
+
       changeMode(); // 로그인 페이지로 이동
     }
 

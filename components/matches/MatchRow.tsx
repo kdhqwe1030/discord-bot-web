@@ -9,6 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import { groupAPI } from "@/lib/api/group";
 import { useState } from "react";
 import { IoIosArrowDown } from "react-icons/io";
+import { kdaColor } from "@/utils/kdhColor";
 
 const MatchRow = ({ match }: { match: Match }) => {
   const isWin = match.groupWin;
@@ -60,7 +61,7 @@ const MatchRow = ({ match }: { match: Match }) => {
       >
         {/* 왼쪽 정보 레일 */}
         <div
-          className={`flex flex-col justify-center gap-1 px-4 py-3 w-28 ${railColor}`}
+          className={`flex flex-col justify-center gap-1 px-4 py-3 w-30 ${railColor}`}
         >
           <span className="text-md font-semibold tracking-wide">
             {resultText}
@@ -76,7 +77,7 @@ const MatchRow = ({ match }: { match: Match }) => {
         </div>
 
         {/* 플레이어들 */}
-        <div className="flex-1 flex items-center gap-6 px-6 py-3 overflow-x-auto">
+        <div className="flex-1 flex items-center gap-6 px-4 py-3 overflow-x-auto">
           {filterList.map((player: MatchPlayer, index: number) => {
             const rawKda = player.deaths
               ? (player.kills + player.assists) / player.deaths
@@ -86,7 +87,7 @@ const MatchRow = ({ match }: { match: Match }) => {
             return (
               <div
                 key={index}
-                className="flex flex-col items-center gap-1 lg:w-24"
+                className="flex flex-col items-center gap-1 lg:w-26"
               >
                 <ChmpionImg championName={player.championName} />
 
@@ -101,8 +102,8 @@ const MatchRow = ({ match }: { match: Match }) => {
                 {/* KDA */}
                 <div className="text-sm text-text-3">
                   {player.kills}/{player.deaths}/{player.assists}{" "}
-                  <span className="ml-1 text-xs text-text-4">
-                    {kda === "Perfect" ? "PERFECT" : `${kda}`}
+                  <span className={`ml-1 text-xs ${kdaColor(kda)}`}>
+                    {kda === "Perfect" ? "PERFECT" : kda}
                   </span>
                 </div>
               </div>
@@ -110,7 +111,7 @@ const MatchRow = ({ match }: { match: Match }) => {
           })}
         </div>
         <div
-          className={`flex items-center px-4 ${
+          className={`flex items-center mr-4 ${
             isClick ? "rotate-180" : "rotate-0"
           } transition-all duration-300`}
         >
