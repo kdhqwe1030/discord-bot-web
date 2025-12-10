@@ -37,10 +37,13 @@ const GroupCard = ({
   });
   const winRateColor =
     typeof data?.winRatePercent === "number"
-      ? data?.winRatePercent >= 50
-        ? "text-emerald-400"
-        : "text-red-400"
-      : "text-text-2";
+      ? data?.totalMatches !== 0
+        ? data?.winRatePercent >= 50
+          ? "text-emerald-400" //승률이 50이상인 경우
+          : "text-red-400" //승률이 50 미만인 경우
+        : "text-text-2" //매치가 0번인 경우
+      : "text-text-2"; //defalut
+
   return (
     <div
       className="w-full bg-surface-1  rounded-2xl p-6 shadow-lg shadow-black/40 text-text-1  h-64 hover:border-discord border-2 border-transparent transition-all cursor-pointer"
@@ -90,11 +93,12 @@ const GroupCard = ({
             승률
           </span>
           {isLoading || isError ? (
-            <></>
+            <p className="mt-2 text-lg font-semibold">-</p>
           ) : (
-            <span className={`mt-2 text-lg font-semibold ${winRateColor}`}>
-              {data?.winRatePercent ?? "-"}%
-            </span>
+            <p className={`mt-2 text-lg font-semibold ${winRateColor}`}>
+              {data?.totalMatches !== 0 ? data?.winRatePercent ?? "-" : "-"}
+              {data?.totalMatches !== 0 ? "%" : ""}
+            </p>
           )}
         </div>
       </div>
