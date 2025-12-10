@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/supabaseServer";
-import { syncGroupMatches } from "@/lib/lol/syncGroupMatches";
+import { syncGroupMatches } from "@/service/syncGroupMatches";
 interface RouteParams {
   params: Promise<{ id: string }>;
 }
