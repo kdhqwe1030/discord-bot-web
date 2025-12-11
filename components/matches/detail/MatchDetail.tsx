@@ -10,6 +10,7 @@ const MatchDetail = ({
   winnerTeamId,
   groupWin,
   matchDuration,
+  growthData,
 }: MatchDetailProps) => {
   const [section, setSection] = useState<
     "summary" | "GroWth" | "Combat" | "Macro"
@@ -31,7 +32,7 @@ const MatchDetail = ({
         matchDuration={matchDuration}
       />
     ),
-    GroWth: <MatchGrowth />,
+    GroWth: <MatchGrowth growthData={growthData} />,
     Combat: <MatchCombat />,
     Macro: <MatchMacro />,
   };

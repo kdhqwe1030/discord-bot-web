@@ -60,6 +60,7 @@ export interface MatchDetailProps {
   winnerTeamId: number;
   groupWin: boolean;
   matchDuration: number;
+  growthData?: any;
 }
 
 export interface TeamStatsProps {

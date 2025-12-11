@@ -124,6 +124,7 @@ const MatchRow = ({ match }: { match: Match }) => {
           winnerTeamId={match.winnerTeamId}
           groupWin={match.groupWin}
           matchDuration={match.durationSeconds}
+          growthData={data.growth}
         />
       )}
     </>
