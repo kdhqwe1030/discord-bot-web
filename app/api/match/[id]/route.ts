@@ -2,16 +2,13 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/supabaseServer";
-import { analyzeGrowth } from "@/service/analysis/growthService";
-
-const RIOT_API_KEY = process.env.RIOT_API_KEY!;
 
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const supabase = await createClient();
-  const { id } = await params; // matchId (ex: KR_12345)
+  const { id: matchId } = await params;
 
   // 1) 로그인 확인
   const {
@@ -26,75 +23,141 @@ export async function GET(
   }
 
   try {
-    // 2) 라이엇 API 호출 (병렬 처리로 속도 최적화)
-    const matchUrl = `https://asia.api.riotgames.com/lol/match/v5/matches/${id}`;
-    const timelineUrl = `https://asia.api.riotgames.com/lol/match/v5/matches/${id}/timeline`;
+    // 2) 참가자 스냅샷
+    const { data: participantRows, error: participantsError } = await supabase
+      .from("match_participants")
+      .select("*")
+      .eq("match_id", matchId)
+      .order("participant_id", { ascending: true });
 
-    const [matchRes, timelineRes] = await Promise.all([
-      fetch(matchUrl, { headers: { "X-Riot-Token": RIOT_API_KEY } }),
-      fetch(timelineUrl, { headers: { "X-Riot-Token": RIOT_API_KEY } }),
-    ]);
-
-    if (!matchRes.ok || !timelineRes.ok) {
-      throw new Error(
-        `Riot API Error: ${matchRes.status} / ${timelineRes.status}`
+    if (participantsError) {
+      console.error("❌ match_participants 조회 에러:", participantsError);
+      return NextResponse.json(
+        { error: "참가자 정보 조회 중 오류가 발생했습니다." },
+        { status: 500 }
       );
     }
 
-    const matchData = await matchRes.json();
-    const timelineData = await timelineRes.json();
-    const info = matchData.info;
-    const participants = (info?.participants ?? []) as any[];
+    // 3) 팀 스냅샷
+    const { data: teamRows, error: teamsError } = await supabase
+      .from("match_teams")
+      .select("*")
+      .eq("match_id", matchId);
 
-    const groupId = "c9d27b57-0810-430f-a8bb-0b9c7c2d4816";
-    let groupTeamId: number = 100;
-
-    if (groupId) {
-      // 1) 그룹 멤버 user_id 목록
-      const { data: memberRows } = await supabase
-        .from("group_members")
-        .select("user_id")
-        .eq("group_id", groupId);
-
-      if (memberRows && memberRows.length > 0) {
-        const userIds = memberRows.map((m) => m.user_id);
-
-        // 2) 멤버들의 puuid 목록
-        const { data: lolRows } = await supabase
-          .from("lol_accounts")
-          .select("user_id, puuid")
-          .in("user_id", userIds);
-
-        if (lolRows && lolRows.length > 0) {
-          const groupPuuids = new Set(lolRows.map((l) => l.puuid));
-
-          // 3) 이 매치에서 그룹 puuid를 가진 참가자 한 명 찾기
-          const anyGroupParticipant = participants.find((p) =>
-            groupPuuids.has(p.puuid)
-          );
-
-          if (anyGroupParticipant) {
-            groupTeamId = anyGroupParticipant.teamId as number; // 100 or 200
-          }
-        }
-      }
+    if (teamsError) {
+      console.error("❌ match_teams 조회 에러:", teamsError);
+      return NextResponse.json(
+        { error: "팀 정보 조회 중 오류가 발생했습니다." },
+        { status: 500 }
+      );
     }
-    // 4) 성장 데이터 분석 (Growth Service)
-    const growthData = analyzeGrowth(matchData, timelineData, groupTeamId);
 
-    // 5) 응답
+    const participants = (participantRows ?? []).map((row: any) => {
+      const totalCs = row.total_cs ?? 0;
+
+      return {
+        participantId: row.participant_id,
+        teamId: row.team_id,
+        puuid: row.puuid,
+        riotIdGameName: row.riot_game_name,
+        riotIdTagline: row.riot_tagline,
+
+        championName: row.champion_name,
+        champLevel: row.champ_level,
+
+        kills: row.kills,
+        deaths: row.deaths,
+        assists: row.assists,
+
+        challenges: {
+          killParticipation: row.kill_participation,
+        },
+
+        totalDamageDealtToChampions: row.total_damage_dealt,
+        totalDamageTaken: row.total_damage_taken,
+
+        totalMinionsKilled: totalCs,
+        neutralMinionsKilled: 0,
+
+        goldEarned: row.gold_earned,
+
+        visionScore: row.vision_score,
+        wardsPlaced: row.wards_placed,
+        detectorWardsPlaced: row.detector_wards_placed,
+
+        item0: row.item0,
+        item1: row.item1,
+        item2: row.item2,
+        item3: row.item3,
+        item4: row.item4,
+        item5: row.item5,
+        item6: row.item6,
+
+        summoner1Id: row.summoner1_id,
+        summoner2Id: row.summoner2_id,
+
+        perks: {
+          styles: [
+            {
+              style: null,
+              selections: [
+                {
+                  perk: row.primary_perk_id,
+                },
+              ],
+            },
+            {
+              style: row.sub_style_id,
+              selections: [],
+            },
+          ],
+        },
+      };
+    });
+
+    const teams = (teamRows ?? []).map((row: any) => ({
+      teamId: row.team_id,
+      win: row.win,
+      objectives: row.objectives ?? {},
+    }));
+
+    const matchData = {
+      info: {
+        participants,
+        teams,
+      },
+    };
+
+    // 4) 성장 데이터(match_growth) 조회
+    const { data: growthRow, error: growthError } = await supabase
+      .from("match_growth")
+      .select("graph, laning, max_turnover")
+      .eq("match_id", matchId)
+      .maybeSingle();
+
+    if (growthError) {
+      console.error("❌ match_growth 조회 에러:", growthError);
+      // 여기서는 전적 상세는 보여주되 성장 탭만 비워둘 수 있으니, 에러로 끊지는 않음
+    }
+
+    const growth = growthRow
+      ? {
+          graph: growthRow.graph,
+          laning: growthRow.laning,
+          maxTurnover: growthRow.max_turnover,
+        }
+      : null;
+
     return NextResponse.json(
       {
-        matchData: matchData,
-        matchId: id,
-        growth: growthData,
-        // 필요하다면 원본 데이터도 함께 줄 수 있음 (디버깅용)
-        // raw: { matchData, timelineData }
+        matchData,
+        matchId,
+        growth, // 프론트에서 기존처럼 growth.graph / growth.laning 쓰면 됨
       },
       { status: 200 }
     );
   } catch (error: any) {
-    console.error("Error fetching match data:", error);
+    console.error("❌ DB 기반 매치 조회 전체 에러:", error);
     return NextResponse.json(
       { error: "데이터를 불러오는 중 오류가 발생했습니다." },
       { status: 500 }

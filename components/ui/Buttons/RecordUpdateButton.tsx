@@ -38,6 +38,25 @@ const RecordUpdateButton = ({ groupId }: { groupId: string }) => {
     queryFn: () => groupAPI.fetchLastSyncedAt(groupId),
   });
   const [cooldownRemaining, setCooldownRemaining] = useState(0);
+  const [loadingDots, setLoadingDots] = useState(""); //로딩 중 점 애니메이션
+
+  useEffect(() => {
+    if (!isPending) {
+      setLoadingDots("");
+      return;
+    }
+
+    const interval = setInterval(() => {
+      setLoadingDots((prev) => {
+        if (prev === "") return ".";
+        if (prev === ".") return "..";
+        if (prev === "..") return "...";
+        return "";
+      });
+    }, 400); // 속도는 취향대로 조절 (400~500ms 정도가 무난)
+
+    return () => clearInterval(interval);
+  }, [isPending]);
 
   // lastSyncedAt 바뀔 때마다 쿨다운 계산 & 타이머 설정
   useEffect(() => {
@@ -83,7 +102,7 @@ const RecordUpdateButton = ({ groupId }: { groupId: string }) => {
 
   let buttonText = "전적 갱신";
   if (isPending) {
-    buttonText = "갱신 중...";
+    buttonText = `갱신 중${loadingDots}`;
   } else if (cooldownRemaining > 0) {
     const secondsLeft = Math.ceil(cooldownRemaining / 1000);
     const minutes = Math.floor(secondsLeft / 60);
