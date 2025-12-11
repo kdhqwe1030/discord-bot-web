@@ -44,7 +44,7 @@ const InviteClient = ({ token }: InviteClientProps) => {
   }, [token]);
 
   const handleGoLogin = () => {
-    const next = encodeURIComponent(`/invite/${token}`);
+    const next = `/invite/${token}`;
     router.push(`/login?next=${next}`);
   };
 
