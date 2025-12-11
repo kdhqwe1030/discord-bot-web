@@ -1,5 +1,5 @@
+import { TeamStatsProps } from "@/types/analysis";
 import TeamObjectives from "./TeamObjectives";
-import { TeamStatsProps } from "../type";
 
 const TeamAnalysisHeader = ({ matchData, groupTeamId }: TeamStatsProps) => {
   const teams = matchData?.info?.teams;

@@ -67,3 +67,51 @@ export interface TeamStatsProps {
   matchData: any;
   groupTeamId: number;
 }
+
+export interface TimeLineGraphData {
+  minute: number;
+  goldDiff: number; // 양수: 우리팀 우세, 음수: 상대팀 우세
+  myTeamGold: number;
+  enemyTeamGold: number;
+  events: {
+    type: "KILL" | "OBJECTIVE" | "TURRET";
+    description: string;
+    timestamp: number;
+    isMyTeam?: boolean;
+    monsterType?: string;
+  }[];
+}
+
+export interface LaneStat {
+  championName: string;
+  playerName: string;
+  playerTag: string;
+  gold: number;
+  cs: number;
+  xp: number;
+  level: number;
+}
+
+export interface LaningPhaseStats {
+  [role: string]: {
+    // TOP, JUNGLE, MIDDLE, BOTTOM, UTILITY
+    ourPlayer: LaneStat;
+    opponentPlayer: LaneStat;
+    diff: {
+      gold: number;
+      cs: number;
+      xp: number;
+    };
+    isWin: boolean; // 골드 차이로 판정
+  };
+}
+
+export interface GrowthAnalysisResponse {
+  graph: TimeLineGraphData[];
+  laning: LaningPhaseStats;
+  maxTurnover: {
+    minute: number;
+    changeAmount: number;
+    description: string;
+  } | null;
+}
