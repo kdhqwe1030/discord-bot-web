@@ -1,6 +1,6 @@
-import MatchDetailHeader from "../Header/MatchDetailHeader";
+import MatchDetailHeader from "./Header/MatchDetailHeader";
 import MatchDetailRow from "../MatchDetailRow";
-import TeamAnalysisHeader from "../Header/TeamAnalysisHeader";
+import TeamAnalysisHeader from "./Header/TeamAnalysisHeader";
 import { MatchDetailProps, Participant } from "../type";
 
 const MatchSummary = ({
