@@ -57,6 +57,10 @@ const GrowthGraph = ({ growthData, myTeamId }: GrowthGraphProps) => {
 
   // 아이콘 실제 위치(hitbox) 저장
   const iconHitBoxesRef = useRef<IconHitBox[]>([]);
+  //아이콘 애니메이션 관련
+  const hoveredIconTsRef = useRef<number | null>(null);
+  const iconYOffsetRef = useRef<Map<number, number>>(new Map()); // timestamp -> yOffset
+  const rafRef = useRef<number | null>(null);
 
   if (!growthData || !growthData.graph || growthData.graph.length === 0) {
     return (
@@ -129,6 +133,41 @@ const GrowthGraph = ({ growthData, myTeamId }: GrowthGraphProps) => {
   // 커스텀 플러그인: 아이콘 + 히트박스 그리기
   const objectIconsPlugin: Plugin<"line"> = {
     id: "objectIcons",
+
+    afterInit: (chart) => {
+      const onMove = (evt: MouseEvent) => {
+        const rect = chart.canvas.getBoundingClientRect();
+        const mx = evt.clientX - rect.left;
+        const my = evt.clientY - rect.top;
+
+        const hit = iconHitBoxesRef.current.find((b) => {
+          return (
+            mx >= b.x && mx <= b.x + b.size && my >= b.y && my <= b.y + b.size
+          );
+        });
+
+        hoveredIconTsRef.current = hit ? hit.timestamp : null;
+      };
+
+      const onLeave = () => {
+        hoveredIconTsRef.current = null;
+      };
+
+      chart.canvas.addEventListener("mousemove", onMove);
+      chart.canvas.addEventListener("mouseleave", onLeave);
+
+      // cleanup 저장
+      (chart as any)._objIconOnMove = onMove;
+      (chart as any)._objIconOnLeave = onLeave;
+    },
+
+    beforeDestroy: (chart) => {
+      const onMove = (chart as any)._objIconOnMove;
+      const onLeave = (chart as any)._objIconOnLeave;
+      if (onMove) chart.canvas.removeEventListener("mousemove", onMove);
+      if (onLeave) chart.canvas.removeEventListener("mouseleave", onLeave);
+    },
+
     afterDraw: (chart) => {
       const {
         ctx,
@@ -138,16 +177,40 @@ const GrowthGraph = ({ growthData, myTeamId }: GrowthGraphProps) => {
 
       if (!chartArea) return;
 
-      // 매번 초기화
+      // ---- 애니메이션 업데이트 (lerp) ----
+      const HOVER_UP = -4;
+      const SELECT_UP = -8;
+      const LERP = 0.2;
+
+      let needRedraw = false;
+
+      for (const obj of objectEvents) {
+        const key = obj.timestamp;
+        const current = iconYOffsetRef.current.get(key) ?? 0;
+
+        const isHovered = hoveredIconTsRef.current === key;
+        const isSelected = selectedObjectiveTs === key;
+
+        const target = isSelected ? SELECT_UP : isHovered ? HOVER_UP : 0;
+        const next = current + (target - current) * LERP;
+
+        if (Math.abs(next - current) > 0.1) needRedraw = true;
+        iconYOffsetRef.current.set(key, next);
+      }
+
+      if (needRedraw) {
+        if (rafRef.current) cancelAnimationFrame(rafRef.current);
+        rafRef.current = requestAnimationFrame(() => chart.draw());
+      }
+
+      // ---- 아이콘 실제 그리기 ----
       iconHitBoxesRef.current = [];
+
       objectEvents.forEach((obj) => {
-        const minute = obj.minute;
-        const xPos = x.getPixelForValue(minute);
-        const yPos = y.bottom;
+        const xPos = x.getPixelForValue(obj.minute);
+        const baseY = y.bottom;
 
-        const img = new Image();
         const rawType = obj.type.toLowerCase();
-
         const typeKey = rawType.includes("dragon")
           ? "dragon"
           : rawType.includes("baron")
@@ -158,17 +221,16 @@ const GrowthGraph = ({ growthData, myTeamId }: GrowthGraphProps) => {
           ? "vilemaw"
           : "herald";
 
+        const img = new Image();
         img.src = getObjectiveIconUrl(typeKey as any, obj.isMyTeam);
 
-        const size = 16; // 원래 사이즈
+        const size = 16;
+        const yOffset = iconYOffsetRef.current.get(obj.timestamp) ?? 0;
+
         const iconX = xPos - size / 2;
-        const iconY = yPos - size - 5; // X축 바로 위
+        const iconY = baseY - size - 5 + yOffset;
 
-        // 둥근 border 박스
-        const padding = 4;
-        const w = size + padding * 2;
-
-        // 히트박스 저장
+        // hitbox도 움직인 위치 기준으로 저장 (중요!)
         iconHitBoxesRef.current.push({
           x: iconX,
           y: iconY,
@@ -176,10 +238,10 @@ const GrowthGraph = ({ growthData, myTeamId }: GrowthGraphProps) => {
           minute: obj.minute,
           timestamp: obj.timestamp,
         });
-        const drawIcon = () => {
+
+        const draw = () => {
           ctx.save();
 
-          // 둥근 border 박스 (아이콘 크기에 맞게)
           const padding = 4;
           const radius = 5;
           const w = size + padding * 2;
@@ -187,9 +249,12 @@ const GrowthGraph = ({ growthData, myTeamId }: GrowthGraphProps) => {
           const bx = xPos - w / 2;
           const by = iconY - padding;
 
+          const isHovered = hoveredIconTsRef.current === obj.timestamp;
+          const isSelected = selectedObjectiveTs === obj.timestamp;
+
           ctx.fillStyle = "rgba(15, 23, 42, 0.95)";
           ctx.strokeStyle = obj.isMyTeam ? "#3b82f6" : "#f97373";
-          ctx.lineWidth = 2;
+          ctx.lineWidth = isSelected ? 3 : isHovered ? 2.5 : 2;
 
           ctx.beginPath();
           ctx.moveTo(bx + radius, by);
@@ -205,19 +270,16 @@ const GrowthGraph = ({ growthData, myTeamId }: GrowthGraphProps) => {
           ctx.fill();
           ctx.stroke();
 
-          // 아이콘 그리기
           ctx.drawImage(img, iconX, iconY, size, size);
           ctx.restore();
         };
 
-        if (img.complete) {
-          drawIcon();
-        } else {
+        if (img.complete) draw();
+        else
           img.onload = () => {
-            drawIcon();
+            draw();
             chart.draw();
           };
-        }
       });
     },
   };
