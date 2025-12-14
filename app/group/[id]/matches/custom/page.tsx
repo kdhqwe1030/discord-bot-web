@@ -9,7 +9,7 @@ const CustomMatchesPage = async ({ params }: CustomMatchesPageProps) => {
 
   return (
     <div>
-      <h2 className="text-xl font-semibold text-text-1 mb-4">사설</h2>
+      <h2 className="text-xl font-semibold text-text-1 mb-4">사용자 설정</h2>
       <MatchWrapper groupId={groupId} type="custom" />
     </div>
   );
