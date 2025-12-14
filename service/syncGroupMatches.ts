@@ -2,6 +2,7 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { fetchWithRetry } from "@/service/fetchWithRetry";
 import { analyzeGrowth } from "@/service/analysis/growthService";
+import { analyzeGameFlow } from "./analysis/gameFlowService";
 
 const RIOT_REGION = "asia";
 
@@ -353,9 +354,8 @@ export async function syncGroupMatches(
       if (anyGroupParticipant) {
         myTeamId = anyGroupParticipant.teamId as number; // 100 or 200
       }
-
-      const growth = analyzeGrowth(match, timeline, myTeamId);
-
+      // A. 성장 지표 분석
+      const growth = analyzeGrowth(match, timeline);
       const { error: growthError } = await supabase.from("match_growth").upsert(
         {
           match_id: matchIdStr,
@@ -370,6 +370,23 @@ export async function syncGroupMatches(
 
       if (growthError) {
         console.error("❌ match_growth upsert 에러:", growthError);
+      }
+
+      // B. 게임 흐름 분석
+      const gameFlow = analyzeGameFlow(match, timeline);
+
+      const { error: flowError } = await supabase
+        .from("match_game_flows")
+        .upsert(
+          {
+            match_id: matchIdStr,
+            flow_events: gameFlow, // JSONB 배열 저장
+          },
+          { onConflict: "match_id" }
+        );
+
+      if (flowError) {
+        console.error("❌ match_game_flows upsert 에러:", flowError);
       }
     } catch (e) {
       console.error("❌ 성장 분석/저장 에러 (match_growth):", e);
