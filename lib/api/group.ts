@@ -1,6 +1,11 @@
 import api, { ApiResponse } from "./client";
 import type { PollWithResults } from "@/types/poll";
-export type MatchType = "all" | "aram" | "custom" | "ranked";
+export type MatchType =
+  | "all"
+  | "aram"
+  | "custom"
+  | "team_ranked"
+  | "solo_ranked";
 
 interface AddGroupsType {
   name: string;

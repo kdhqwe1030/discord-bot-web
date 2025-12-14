@@ -15,6 +15,7 @@ const MatchesLayout = ({ children }: MatchesLayoutProps) => {
   const tabs = [
     { name: "전체", path: `/group/${groupId}/matches/all` },
     { name: "자유랭크", path: `/group/${groupId}/matches/ranked` },
+    { name: "솔로랭크", path: `/group/${groupId}/matches/sranked` },
     { name: "칼바람", path: `/group/${groupId}/matches/aram` },
     { name: "사용자설정", path: `/group/${groupId}/matches/custom` },
   ];

@@ -9,8 +9,8 @@ const RankedMatchesPage = async ({ params }: RankedMatchesPageProps) => {
 
   return (
     <div>
-      <h2 className="text-xl font-semibold text-text-1 mb-4">자유랭크</h2>
-      <MatchWrapper groupId={groupId} type="team_ranked" />
+      <h2 className="text-xl font-semibold text-text-1 mb-4">솔로랭크</h2>
+      <MatchWrapper groupId={groupId} type="solo_ranked" />
     </div>
   );
 };
