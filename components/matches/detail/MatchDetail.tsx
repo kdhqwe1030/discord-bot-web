@@ -16,6 +16,8 @@ const MatchDetail = ({
     "summary" | "GroWth" | "Combat" | "Macro"
   >("summary");
 
+  const myTeamId = groupWin ? winnerTeamId : winnerTeamId === 100 ? 200 : 100;
+
   const tabs = [
     { key: "summary", label: "종합" },
     { key: "GroWth", label: "성장" },
@@ -32,7 +34,7 @@ const MatchDetail = ({
         matchDuration={matchDuration}
       />
     ),
-    GroWth: <MatchGrowth growthData={growthData} />,
+    GroWth: <MatchGrowth growthData={growthData} myTeamId={myTeamId} />,
     Combat: <MatchCombat />,
     Macro: <MatchMacro />,
   };

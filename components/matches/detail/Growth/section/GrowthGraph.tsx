@@ -20,6 +20,7 @@ import { Line } from "react-chartjs-2";
 import { GrowthAnalysisResponse } from "@/types/analysis";
 import { getObjectiveIconUrl } from "@/utils/lolImg";
 import { getObjectiveDisplayName } from "@/utils/lolParseString";
+import { GrowthGraphProps } from "../MatchGrowth";
 
 ChartJS.register(
   CategoryScale,
@@ -31,10 +32,6 @@ ChartJS.register(
   Legend,
   Filler
 );
-
-interface GrowthGraphProps {
-  growthData: GrowthAnalysisResponse | null;
-}
 
 // OBJECTIVE 이벤트 타입
 type ObjectiveEvent = {
@@ -52,7 +49,7 @@ type IconHitBox = {
   timestamp: number;
 };
 
-const GrowthGraph = ({ growthData }: GrowthGraphProps) => {
+const GrowthGraph = ({ growthData, myTeamId }: GrowthGraphProps) => {
   const [selectedMinute, setSelectedMinute] = useState<number | null>(null);
   const [selectedObjectiveTs, setSelectedObjectiveTs] = useState<number | null>(
     null
@@ -69,7 +66,11 @@ const GrowthGraph = ({ growthData }: GrowthGraphProps) => {
 
   const graphData = growthData.graph;
   const labels = graphData.map((d) => `${d.minute}분`);
-  const goldDiffData = graphData.map((d) => d.goldDiff);
+  const isBlueTeam = myTeamId === 100;
+
+  const goldDiffData = graphData.map((d) =>
+    isBlueTeam ? d.goldDiff : -d.goldDiff
+  );
 
   const maxAbsValue = Math.max(...goldDiffData.map((v) => Math.abs(v)));
 
@@ -106,7 +107,7 @@ const GrowthGraph = ({ growthData }: GrowthGraphProps) => {
         .map((e) => ({
           minute: d.minute,
           type: e.monsterType ?? "UNKNOWN",
-          isMyTeam: !!e.isMyTeam,
+          isMyTeam: e.triggerTeamId === myTeamId,
           timestamp: e.timestamp,
         }))
     )
@@ -397,15 +398,17 @@ const GrowthGraph = ({ growthData }: GrowthGraphProps) => {
           <div className="mt-2 grid grid-cols-2 gap-4">
             {(["our", "enemy"] as const).map((side) => {
               const isMyTeam = side === "our";
+              const checkIsMyEvent = (teamId: number) => teamId === myTeamId;
 
               const sideObjective = objectiveEvents.filter(
-                (e) => e.isMyTeam === isMyTeam
+                (e) => checkIsMyEvent(e.triggerTeamId) === isMyTeam
               );
               const sideKills = killEvents.filter(
-                (e) => e.isMyTeam === isMyTeam
+                (e) => checkIsMyEvent(e.triggerTeamId) === isMyTeam
               );
+              // 포탑 파괴(TURRET)는 triggerTeamId가 '깬 팀'이므로 그대로 비교
               const sideTowers = towerEvents.filter(
-                (e) => e.isMyTeam === isMyTeam
+                (e) => checkIsMyEvent(e.triggerTeamId) === isMyTeam
               );
 
               const killCount = sideKills.length;
