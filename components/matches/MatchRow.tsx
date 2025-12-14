@@ -9,7 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import { groupAPI } from "@/lib/api/group";
 import { useState } from "react";
 import { IoIosArrowDown } from "react-icons/io";
-import { kdaColor } from "@/utils/kdhColor";
+import { kdaColor } from "@/utils/kdaColor";
 
 const MatchRow = ({ match }: { match: Match }) => {
   const isWin = match.groupWin;

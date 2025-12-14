@@ -7,7 +7,7 @@ import {
 import ChmpionImg from "../ChmpionImg";
 import Image from "next/image";
 import { Participant } from "./type";
-import { kdaColor } from "@/utils/kdhColor";
+import { kdaColor } from "@/utils/kdaColor";
 
 const MatchDetailRow = ({
   player,
