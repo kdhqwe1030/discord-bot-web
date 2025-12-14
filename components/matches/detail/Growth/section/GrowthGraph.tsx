@@ -19,6 +19,7 @@ import {
 import { Line } from "react-chartjs-2";
 import { GrowthAnalysisResponse } from "@/types/analysis";
 import { getObjectiveIconUrl } from "@/utils/lolImg";
+import { getObjectiveDisplayName } from "@/utils/lolParseString";
 
 ChartJS.register(
   CategoryScale,
@@ -40,6 +41,7 @@ type ObjectiveEvent = {
   minute: number;
   type: string;
   isMyTeam: boolean;
+  timestamp: number;
 };
 
 type IconHitBox = {
@@ -47,10 +49,14 @@ type IconHitBox = {
   y: number;
   size: number;
   minute: number;
+  timestamp: number;
 };
 
 const GrowthGraph = ({ growthData }: GrowthGraphProps) => {
   const [selectedMinute, setSelectedMinute] = useState<number | null>(null);
+  const [selectedObjectiveTs, setSelectedObjectiveTs] = useState<number | null>(
+    null
+  );
 
   // 아이콘 실제 위치(hitbox) 저장
   const iconHitBoxesRef = useRef<IconHitBox[]>([]);
@@ -66,8 +72,7 @@ const GrowthGraph = ({ growthData }: GrowthGraphProps) => {
   const goldDiffData = graphData.map((d) => d.goldDiff);
 
   const maxAbsValue = Math.max(...goldDiffData.map((v) => Math.abs(v)));
-  const yLimit =
-    maxAbsValue === 0 ? 1000 : Math.ceil((maxAbsValue * 1.1) / 100) * 100 * 1.5;
+
   // 1) 기본 limit (데이터 기준 + 약간 margin) — 1000 단위로 올림
   const baseLimit =
     maxAbsValue === 0 ? 1000 : Math.ceil((maxAbsValue * 1.1) / 1000) * 1000;
@@ -93,16 +98,33 @@ const GrowthGraph = ({ growthData }: GrowthGraphProps) => {
   const enemyTeamBg = "rgba(239, 68, 68, 0.2)";
 
   // OBJECTIVE 이벤트 추출 (타입 에러 방지용 기본값 포함)
-  const objectEvents: ObjectiveEvent[] = graphData.flatMap((d) =>
-    d.events
-      .filter((e) => e.type === "OBJECTIVE" && e.monsterType)
-      .map((e) => ({
-        minute: d.minute,
-        type: e.monsterType ?? "UNKNOWN",
-        isMyTeam: !!e.isMyTeam,
-      }))
-  );
 
+  const rawObjectEvents: ObjectiveEvent[] = graphData
+    .flatMap((d) =>
+      d.events
+        .filter((e) => e.type === "OBJECTIVE" && e.monsterType)
+        .map((e) => ({
+          minute: d.minute,
+          type: e.monsterType ?? "UNKNOWN",
+          isMyTeam: !!e.isMyTeam,
+          timestamp: e.timestamp,
+        }))
+    )
+    .sort((a, b) => a.timestamp - b.timestamp);
+  const OBJECTIVE_MARKER_COOLDOWN = 60 * 1000; // 1분
+
+  const objectEvents: ObjectiveEvent[] = [];
+  let lastMarkerTs: number | null = null;
+
+  for (const obj of rawObjectEvents) {
+    if (
+      lastMarkerTs === null ||
+      obj.timestamp - lastMarkerTs >= OBJECTIVE_MARKER_COOLDOWN
+    ) {
+      objectEvents.push(obj);
+      lastMarkerTs = obj.timestamp;
+    }
+  }
   // 커스텀 플러그인: 아이콘 + 히트박스 그리기
   const objectIconsPlugin: Plugin<"line"> = {
     id: "objectIcons",
@@ -124,10 +146,15 @@ const GrowthGraph = ({ growthData }: GrowthGraphProps) => {
 
         const img = new Image();
         const rawType = obj.type.toLowerCase();
+
         const typeKey = rawType.includes("dragon")
           ? "dragon"
           : rawType.includes("baron")
           ? "baron"
+          : rawType.includes("herald")
+          ? "herald"
+          : rawType.includes("atakhan")
+          ? "vilemaw"
           : "herald";
 
         img.src = getObjectiveIconUrl(typeKey as any, obj.isMyTeam);
@@ -146,8 +173,8 @@ const GrowthGraph = ({ growthData }: GrowthGraphProps) => {
           y: iconY,
           size,
           minute: obj.minute,
+          timestamp: obj.timestamp,
         });
-
         const drawIcon = () => {
           ctx.save();
 
@@ -249,12 +276,17 @@ const GrowthGraph = ({ growthData }: GrowthGraphProps) => {
       });
 
       if (!hit) return;
+      setSelectedMinute(hit.minute);
+
+      setSelectedObjectiveTs(hit.timestamp);
 
       // 같은 분 한 번 더 클릭하면 토글로 닫기
       if (selectedMinute === hit.minute) {
         setSelectedMinute(null);
+        setSelectedObjectiveTs(null);
       } else {
         setSelectedMinute(hit.minute);
+        setSelectedObjectiveTs(hit.timestamp);
       }
     },
 
@@ -319,8 +351,18 @@ const GrowthGraph = ({ growthData }: GrowthGraphProps) => {
       : null;
 
   type GrowthEvent = GrowthAnalysisResponse["graph"][number]["events"][number];
+  const RANGE_MS = 60 * 1000; // 1분
 
-  const minuteEvents: GrowthEvent[] = selectedMinuteData?.events ?? [];
+  const rangedEvents =
+    selectedObjectiveTs != null
+      ? graphData.flatMap((d) =>
+          d.events.filter(
+            (e) => Math.abs(e.timestamp - selectedObjectiveTs) <= RANGE_MS
+          )
+        )
+      : [];
+  // const minuteEvents: GrowthEvent[] = selectedMinuteData?.events ?? [];
+  const minuteEvents = rangedEvents;
 
   const killEvents = minuteEvents.filter((e) => e.type === "KILL");
   const objectiveEvents = minuteEvents.filter((e) => e.type === "OBJECTIVE");
@@ -415,7 +457,9 @@ const GrowthGraph = ({ growthData }: GrowthGraphProps) => {
                                 <span className={teamTextClass}>
                                   {teamLabel}
                                 </span>
-                                <span>{e.monsterType} 획득</span>
+                                <span>
+                                  {getObjectiveDisplayName(e.monsterType)} 획득
+                                </span>
                               </li>
                             ))}
                           </ul>
@@ -424,14 +468,14 @@ const GrowthGraph = ({ growthData }: GrowthGraphProps) => {
                       {/* 포탑: 리스트 대신 횟수만 */}
                       {towerCount > 0 && (
                         <div>
-                          <p className="text-xs font-semibold text-fuchsia-300 mb-1">
+                          <p className="text-xs font-semibold text-fuchsia-300 mb-1 mt-1">
                             포탑 / 건물
                           </p>
                           <p className="text-xs text-text-2">
                             <span className={`${teamTextClass} font-semibold`}>
                               {teamLabel}
                             </span>
-                            <span> 포탑 파괴 {towerCount}회</span>
+                            <span> 포탑 파괴 x {towerCount}회</span>
                           </p>
                         </div>
                       )}

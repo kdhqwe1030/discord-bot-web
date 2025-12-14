@@ -134,7 +134,7 @@ export const getStyleImgUrl = (styleId: number): string => {
 };
 
 export const getObjectiveIconUrl = (
-  type: "baron" | "dragon" | "tower" | "herald",
+  type: "baron" | "dragon" | "tower" | "herald" | "vilemaw",
   win: boolean
 ) => {
   const baseUrl =
@@ -145,6 +145,7 @@ export const getObjectiveIconUrl = (
     dragon: `${baseUrl}/dragon-${num}.png`, //드래곤
     tower: `${baseUrl}/tower-${num}.png`, //타워
     herald: `${baseUrl}/herald-${num}.png`, //전령
+    vilemaw: `${baseUrl}/vilemaw-${num}.png`,
   };
 
   return map[type] || map["baron"]; // 기본값
