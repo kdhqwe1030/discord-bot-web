@@ -139,7 +139,7 @@ export interface PlayerPosition {
   teamId: number;
   x: number;
   y: number;
-  isDead: boolean; // 해당 시점에 죽어있는지 여부
+  isDead?: boolean;
 }
 
 export interface GameFlowEvent {
@@ -171,4 +171,7 @@ export interface GameFlowEvent {
 
   // 시점 데이터 (지도 렌더링용)
   playerPositions: PlayerPosition[];
+  deadPositions: PlayerPosition[];
+
+  monsterType?: string;
 }

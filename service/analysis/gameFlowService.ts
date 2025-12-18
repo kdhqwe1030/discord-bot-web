@@ -1,10 +1,11 @@
 import { GameFlowEvent, PlayerPosition } from "@/types/analysis";
 
 // --- 상수 정의 ---
-const TEAMFIGHT_WINDOW = 20000; // 한타 판정 시간 (20초)
-const TEAMFIGHT_RADIUS = 4000; // 한타 판정 반경 (화면 1개 보다 조금 큰 크기)
-const OBJECTIVE_VISION_RADIUS = 5000; // 오브젝트 시야 체크 반경
-const GROUPING_RADIUS = 3000; // 포탑 철거 시 뭉침 판정 반경
+const TEAMFIGHT_WINDOW = 20000; // 20초
+const TEAMFIGHT_RADIUS = 4000;
+const GROUPING_RADIUS = 3000;
+const NEAR_DEATH_WINDOW = 15000; // 오브젝트 전후 15초
+const VISION_CHECK_WINDOW = 60000; // 시야 체크 범위 (1분)
 
 /**
  * 게임 흐름 분석 메인 함수
@@ -49,7 +50,7 @@ function analyzeTeamfights(
   killEvents.forEach((event, index) => {
     if (processedKillIds.has(event.timestamp + event.killerId)) return;
 
-    // 클러스터링 (15초, 3000거리 내)
+    // 클러스터링
     const cluster = killEvents.filter(
       (e, i) =>
         i >= index &&
@@ -57,49 +58,58 @@ function analyzeTeamfights(
         getDistance(event.position, e.position) <= TEAMFIGHT_RADIUS
     );
 
-    // 3킬 이상 발생 시 한타
     if (cluster.length >= 3) {
       cluster.forEach((e) => processedKillIds.add(e.timestamp + e.killerId));
 
       let team100Kills = 0;
       let team200Kills = 0;
+      const deadPositions: PlayerPosition[] = [];
 
       cluster.forEach((e) => {
         const killerTeam = getTeamId(e.killerId, participants);
         if (killerTeam === 100) team100Kills++;
         else team200Kills++;
+
+        const victimInfo = getParticipantInfo(e.victimId, participants);
+        if (victimInfo) {
+          deadPositions.push({
+            participantId: e.victimId,
+            championName: victimInfo.championName,
+            teamId: victimInfo.teamId,
+            x: e.position.x,
+            y: e.position.y,
+          });
+        }
       });
 
-      // 더 많이 죽인 쪽이 승리
       const winningTeamId = team100Kills >= team200Kills ? 100 : 200;
-
-      // 대표 위치 및 플레이어 위치
-      const mainPos = event.position;
       const playerPositions = getPlayerPositionsAt(
         event.timestamp,
         frames,
         participants
       );
 
+      // 한타 발생 시점 기준 시야 데이터 계산
+      const visionData = getVisionStats(event.timestamp, events, participants);
+
       results.push({
         id: `tf-${event.timestamp}`,
         timestamp: event.timestamp,
         type: "TEAMFIGHT",
-        position: mainPos,
-        // trigger: 보통 먼저 킬을 낸 쪽이 이니시 했다고 가정 (또는 winningTeam)
+        position: event.position,
         triggerTeamId: getTeamId(event.killerId, participants),
         winningTeamId: winningTeamId,
-        teamfightData: {
-          team100Kills,
-          team200Kills,
-        },
+        teamfightData: { team100Kills, team200Kills },
+        visionData,
         playerPositions,
+        deadPositions,
       });
     }
   });
 
   return results;
 }
+
 // ==============================================================================
 // 2. 오브젝트 분석 모듈 (Vision Control)
 // ==============================================================================
@@ -112,40 +122,29 @@ function analyzeObjectives(
   const monsterKills = events.filter((e) => e.type === "ELITE_MONSTER_KILL");
 
   monsterKills.forEach((event) => {
-    const killerTeam = getTeamId(event.killerId, participants); // 획득한 팀
+    const killerTeam = getTeamId(event.killerId, participants);
+    const objPos = event.position;
 
-    // 시야 분석 (처치 1분 전 ~ 처치 시점)
-    const visionStart = event.timestamp - 60000;
-    const visionEvents = events.filter(
+    // 시야 데이터 계산
+    const visionStats = getVisionStats(event.timestamp, events, participants);
+
+    const deadPositions: PlayerPosition[] = [];
+    const nearKills = events.filter(
       (e) =>
-        e.timestamp >= visionStart &&
-        e.timestamp <= event.timestamp &&
-        (e.type === "WARD_PLACED" || e.type === "WARD_KILL")
+        e.type === "CHAMPION_KILL" &&
+        Math.abs(e.timestamp - event.timestamp) <= NEAR_DEATH_WINDOW
     );
 
-    const objPos = event.position || { x: 0, y: 0 };
-
-    // 양 팀의 시야 작업 카운트
-    const visionStats = {
-      team100: { placed: 0, killed: 0 },
-      team200: { placed: 0, killed: 0 },
-    };
-
-    visionEvents.forEach((ve) => {
-      // 와드 위치가 오브젝트 근처인지 확인
-      if (
-        getDistance(objPos, { x: ve.position?.x, y: ve.position?.y }) <=
-        OBJECTIVE_VISION_RADIUS
-      ) {
-        const actorTeam = getTeamId(ve.creatorId || ve.killerId, participants);
-
-        if (actorTeam === 100) {
-          if (ve.type === "WARD_PLACED") visionStats.team100.placed++;
-          if (ve.type === "WARD_KILL") visionStats.team100.killed++;
-        } else if (actorTeam === 200) {
-          if (ve.type === "WARD_PLACED") visionStats.team200.placed++;
-          if (ve.type === "WARD_KILL") visionStats.team200.killed++;
-        }
+    nearKills.forEach((kill) => {
+      const victimInfo = getParticipantInfo(kill.victimId, participants);
+      if (victimInfo) {
+        deadPositions.push({
+          participantId: kill.victimId,
+          championName: victimInfo.championName,
+          teamId: victimInfo.teamId,
+          x: kill.position.x,
+          y: kill.position.y,
+        });
       }
     });
 
@@ -154,21 +153,24 @@ function analyzeObjectives(
       timestamp: event.timestamp,
       type: "OBJECTIVE",
       position: objPos,
-      triggerTeamId: killerTeam, // 획득한 팀
-      winningTeamId: killerTeam, // 획득한 팀이 승자
+      triggerTeamId: killerTeam,
+      winningTeamId: killerTeam,
       visionData: visionStats,
+      monsterType: event.monsterType,
       playerPositions: getPlayerPositionsAt(
         event.timestamp,
         frames,
         participants
       ),
+      deadPositions,
     });
   });
 
   return results;
 }
+
 // ==============================================================================
-// 3. 운영 분석 모듈 (Macro / Split Push)
+// 3. 운영 분석 모듈 (Macro)
 // ==============================================================================
 function analyzeStructures(
   events: any[],
@@ -181,8 +183,8 @@ function analyzeStructures(
   );
 
   structureKills.forEach((event) => {
-    const destroyedTeam = event.teamId; // 파괴된 팀
-    const breakerTeam = destroyedTeam === 100 ? 200 : 100; // 깬 팀
+    const destroyedTeam = event.teamId;
+    const breakerTeam = destroyedTeam === 100 ? 200 : 100;
 
     const positions = getPlayerPositionsAt(
       event.timestamp,
@@ -191,30 +193,49 @@ function analyzeStructures(
     );
     const turretPos = event.position;
 
-    // 깬 팀(Breaker Team)의 인원이 타워 근처에 몇 명 있었나?
     const breakersNearTurret = positions.filter(
       (p) =>
         p.teamId === breakerTeam &&
-        !p.isDead &&
         getDistance({ x: p.x, y: p.y }, turretPos) <= GROUPING_RADIUS
     ).length;
 
-    // 4명 이상이면 'GROUP', 아니면 'SPLIT'
     const formation = breakersNearTurret >= 4 ? "GROUP" : "SPLIT";
     const lane = translateLane(event.laneType);
+
+    // 포탑 철거 시점 기준 시야 데이터 계산
+    const visionData = getVisionStats(event.timestamp, events, participants);
+
+    const deadPositions: PlayerPosition[] = [];
+    const nearKills = events.filter(
+      (e) =>
+        e.type === "CHAMPION_KILL" &&
+        Math.abs(e.timestamp - event.timestamp) <= NEAR_DEATH_WINDOW
+    );
+
+    nearKills.forEach((kill) => {
+      const victimInfo = getParticipantInfo(kill.victimId, participants);
+      if (victimInfo) {
+        deadPositions.push({
+          participantId: kill.victimId,
+          championName: victimInfo.championName,
+          teamId: victimInfo.teamId,
+          x: kill.position.x,
+          y: kill.position.y,
+        });
+      }
+    });
 
     results.push({
       id: `st-${event.timestamp}`,
       timestamp: event.timestamp,
       type: "STRUCTURE",
       position: turretPos,
-      triggerTeamId: breakerTeam, // 깬 팀
-      winningTeamId: breakerTeam, // 이득 본 팀
-      macroData: {
-        formation,
-        lane,
-      },
+      triggerTeamId: breakerTeam,
+      winningTeamId: breakerTeam,
+      macroData: { formation, lane },
+      visionData,
       playerPositions: positions,
+      deadPositions,
     });
   });
 
@@ -222,12 +243,47 @@ function analyzeStructures(
 }
 
 // ==============================================================================
-// 4. 유틸리티 함수 (Utils)
+// 4. 유틸리티 함수
 // ==============================================================================
 
 /**
- * 두 좌표 사이의 거리 계산 (Euclidean Distance)
+ * 특정 시점 기준 1분간의 시야(와드 설치/제거) 통계 계산
  */
+function getVisionStats(
+  timestamp: number,
+  allEvents: any[],
+  participants: any[]
+) {
+  const visionStart = timestamp - VISION_CHECK_WINDOW;
+
+  const visionEvents = allEvents.filter(
+    (e) =>
+      e.timestamp >= visionStart &&
+      e.timestamp <= timestamp &&
+      (e.type === "WARD_PLACED" || e.type === "WARD_KILL")
+  );
+
+  const stats = {
+    team100: { placed: 0, killed: 0 },
+    team200: { placed: 0, killed: 0 },
+  };
+
+  visionEvents.forEach((ve) => {
+    const actorId = ve.creatorId || ve.killerId;
+    const actorTeam = getTeamId(actorId, participants);
+
+    if (actorTeam === 100) {
+      if (ve.type === "WARD_PLACED") stats.team100.placed++;
+      if (ve.type === "WARD_KILL") stats.team100.killed++;
+    } else if (actorTeam === 200) {
+      if (ve.type === "WARD_PLACED") stats.team200.placed++;
+      if (ve.type === "WARD_KILL") stats.team200.killed++;
+    }
+  });
+
+  return stats;
+}
+
 function getDistance(
   pos1: { x: number; y: number },
   pos2: { x: number; y: number }
@@ -236,37 +292,27 @@ function getDistance(
   return Math.sqrt(Math.pow(pos1.x - pos2.x, 2) + Math.pow(pos1.y - pos2.y, 2));
 }
 
-/**
- * ParticipantId(1~10)를 TeamId(100/200)로 변환
- */
 function getTeamId(participantId: number, participants: any[]): number {
-  if (participantId === 0) return 0; // killerId가 0(미니언/타워)인 경우 처리
-
-  // participants 배열에서 id로 찾거나, 단순 계산 (1~5: 100, 6~10: 200)
-  // 안전하게 participants 데이터 참조
+  if (participantId === 0) return 0;
   const p = participants.find(
     (user: any) => user.participantId === participantId
   );
   return p ? p.teamId : participantId <= 5 ? 100 : 200;
 }
 
-/**
- * 특정 시간(timestamp)에 가장 가까운 프레임의 플레이어 위치 정보를 가져옴
- */
+function getParticipantInfo(participantId: number, participants: any[]) {
+  return participants.find((p: any) => p.participantId === participantId);
+}
+
 function getPlayerPositionsAt(
   timestamp: number,
   frames: any[],
   participants: any[]
 ): PlayerPosition[] {
-  // 타임스탬프를 분 단위 인덱스로 변환 (Timeline은 1분 단위)
-  // 예: 15분 30초(930000ms) -> index 15 or 16
-  // 가장 가까운 프레임을 찾기 위해 반올림 사용 가능하나, 보통 직전 프레임이나 해당 분 프레임 사용
   const frameIndex = Math.min(Math.round(timestamp / 60000), frames.length - 1);
-
   const frame = frames[frameIndex];
   const playerPositions: PlayerPosition[] = [];
 
-  // 1~10번 참가자 루프
   for (let i = 1; i <= 10; i++) {
     const pFrame = frame.participantFrames[i.toString()];
     const pInfo = participants.find((p: any) => p.participantId === i);
@@ -278,11 +324,9 @@ function getPlayerPositionsAt(
         teamId: pInfo.teamId,
         x: pFrame.position.x,
         y: pFrame.position.y,
-        isDead: false, // Timeline 스냅샷에는 생존 여부가 명시적이지 않음 (추가 로직 필요 시 kill event 참조해야 함)
       });
     }
   }
-
   return playerPositions;
 }
 
