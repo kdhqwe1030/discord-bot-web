@@ -4,9 +4,9 @@ export function getGameModeName({ queueId }: { queueId: number }): string {
   // 2. 큐 ID 매핑
   switch (queueId) {
     case 0:
-      return "사설";
-    // case 420:
-    //   return "솔로 랭크";
+      return "사용자 설정";
+    case 420:
+      return "솔로 랭크";
     case 440:
       return "자유 랭크";
     case 450:

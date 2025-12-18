@@ -59,7 +59,8 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
       | "all"
       | "aram"
       | "custom"
-      | "ranked";
+      | "team_ranked"
+      | "solo_ranked";
 
     // 4. group_matches 기본 쿼리 + type별 queue_id 필터
     let matchQuery = supabase
@@ -70,17 +71,17 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
       .eq("group_id", groupId);
 
     switch (typeParam) {
-      case "aram":
-        // 칼바람
+      case "aram": // 칼바람
         matchQuery = matchQuery.eq("queue_id", 450);
         break;
-      case "custom":
-        // 사설
+      case "custom": // 사설
         matchQuery = matchQuery.eq("queue_id", 0);
         break;
-      case "ranked":
-        // 솔랭 + 자유랭 (필요에 따라 수정)
-        matchQuery = matchQuery.in("queue_id", [420, 440]);
+      case "team_ranked": // 자유랭크
+        matchQuery = matchQuery.eq("queue_id", 440);
+        break;
+      case "solo_ranked": // 솔로랭크
+        matchQuery = matchQuery.eq("queue_id", 420);
         break;
       case "all":
       default:

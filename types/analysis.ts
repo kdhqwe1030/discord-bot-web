@@ -68,16 +68,30 @@ export interface TeamStatsProps {
   groupTeamId: number;
 }
 
+export interface TimelineFrame {
+  timestamp: number;
+  participantFrames: {
+    [key: string]: {
+      totalGold: number;
+      xp: number;
+      minionsKilled: number;
+      jungleMinionsKilled: number;
+      level: number;
+      position?: { x: number; y: number };
+    };
+  };
+  events: any[];
+}
 export interface TimeLineGraphData {
   minute: number;
   goldDiff: number; // 양수: 우리팀 우세, 음수: 상대팀 우세
-  myTeamGold: number;
-  enemyTeamGold: number;
+  team100Gold: number;
+  team200Gold: number;
   events: {
     type: "KILL" | "OBJECTIVE" | "TURRET";
     description: string;
     timestamp: number;
-    isMyTeam?: boolean;
+    triggerTeamId: number;
     monsterType?: string;
   }[];
 }
@@ -95,14 +109,13 @@ export interface LaneStat {
 export interface LaningPhaseStats {
   [role: string]: {
     // TOP, JUNGLE, MIDDLE, BOTTOM, UTILITY
-    ourPlayer: LaneStat;
-    opponentPlayer: LaneStat;
+    team100: LaneStat;
+    team200: LaneStat;
     diff: {
-      gold: number;
+      gold: number; // (100 - 200)
       cs: number;
       xp: number;
     };
-    isWin: boolean; // 골드 차이로 판정
   };
 }
 
@@ -112,6 +125,53 @@ export interface GrowthAnalysisResponse {
   maxTurnover: {
     minute: number;
     changeAmount: number;
-    description: string;
+    winningTeamId: number;
   } | null;
+}
+// ========
+// 흐름 분석
+// ========
+export type FlowEventType = "TEAMFIGHT" | "OBJECTIVE" | "STRUCTURE";
+
+export interface PlayerPosition {
+  participantId: number;
+  championName: string;
+  teamId: number;
+  x: number;
+  y: number;
+  isDead?: boolean;
+}
+
+export interface GameFlowEvent {
+  id: string;
+  timestamp: number;
+  type: FlowEventType;
+
+  // 지도에 표시할 중심 좌표
+  position: { x: number; y: number };
+
+  // 상세 정보 (중립적)
+  triggerTeamId: number; // 이벤트를 발생시킨 주체 (킬/오브젝트/포탑막타)
+  winningTeamId: number; // 이득을 본 팀
+
+  // 데이터 (타입별 상세)
+  teamfightData?: {
+    team100Kills: number;
+    team200Kills: number;
+  };
+  visionData?: {
+    // 오브젝트 획득 시점의 양팀 시야 점수 (설치/제거)
+    team100: { placed: number; killed: number };
+    team200: { placed: number; killed: number };
+  };
+  macroData?: {
+    formation: "GROUP" | "SPLIT"; // 포탑을 깬 팀의 진형
+    lane: string;
+  };
+
+  // 시점 데이터 (지도 렌더링용)
+  playerPositions: PlayerPosition[];
+  deadPositions: PlayerPosition[];
+
+  monsterType?: string;
 }

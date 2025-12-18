@@ -148,11 +148,24 @@ export async function GET(
         }
       : null;
 
+    // 5) [NEW] 게임 흐름 데이터(match_game_flows) 조회
+    const { data: flowRow, error: flowError } = await supabase
+      .from("match_game_flows")
+      .select("flow_events")
+      .eq("match_id", matchId)
+      .maybeSingle();
+
+    if (flowError) {
+      console.error("❌ match_game_flows 조회 에러:", flowError);
+    }
+
+    const gameFlow = flowRow ? flowRow.flow_events : null;
     return NextResponse.json(
       {
         matchData,
         matchId,
-        growth, // 프론트에서 기존처럼 growth.graph / growth.laning 쓰면 됨
+        growth,
+        gameFlow,
       },
       { status: 200 }
     );
