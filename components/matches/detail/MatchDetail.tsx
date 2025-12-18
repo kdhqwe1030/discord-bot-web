@@ -11,11 +11,11 @@ const MatchDetail = ({
   groupWin,
   matchDuration,
   growthData,
+  gameFlow,
 }: MatchDetailProps) => {
   const [section, setSection] = useState<
     "summary" | "GroWth" | "Combat" | "Macro"
   >("summary");
-
   const myTeamId = groupWin ? winnerTeamId : winnerTeamId === 100 ? 200 : 100;
 
   const tabs = [
@@ -35,7 +35,7 @@ const MatchDetail = ({
       />
     ),
     GroWth: <MatchGrowth growthData={growthData} myTeamId={myTeamId} />,
-    Combat: <MatchCombat />,
+    Combat: <MatchCombat gameFlow={gameFlow} myTeamId={myTeamId} />,
     Macro: <MatchMacro />,
   };
 

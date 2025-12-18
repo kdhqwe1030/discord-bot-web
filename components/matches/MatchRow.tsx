@@ -125,6 +125,7 @@ const MatchRow = ({ match }: { match: Match }) => {
           groupWin={match.groupWin}
           matchDuration={match.durationSeconds}
           growthData={data.growth}
+          gameFlow={data.gameFlow}
         />
       )}
     </>

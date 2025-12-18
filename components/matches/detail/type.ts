@@ -61,6 +61,7 @@ export interface MatchDetailProps {
   groupWin: boolean;
   matchDuration: number;
   growthData?: any;
+  gameFlow?: any;
 }
 
 export interface TeamStatsProps {
