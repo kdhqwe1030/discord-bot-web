@@ -129,7 +129,7 @@ const LineStatistics = ({ playerData, myTeamId }: LineStatisticsProps) => {
                   {/* 데이터 바 */}
                   <div
                     className={`absolute inset-y-0 transition-all duration-500 ${
-                      isPositive ? "bg-blue-500" : "bg-red-500"
+                      isPositive ? "bg-win" : "bg-lose"
                     }`}
                     style={{
                       // isPositive(우리 우세) -> 중앙에서 왼쪽으로 뻗음
